@@ -39,4 +39,8 @@ public class Usuario {
     public void desativar() {
         this.ativo = false;
     }
+
+    public void reativar() {
+        this.ativo = true;
+    }
 }

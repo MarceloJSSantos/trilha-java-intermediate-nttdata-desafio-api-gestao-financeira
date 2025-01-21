@@ -42,11 +42,19 @@ public class UsuarioController {
         return ResponseEntity.ok(new UsuarioDadosAposCadastroOuAtualizacaoDTO(usuario));
     }
 
-    @DeleteMapping("/{id}")
+    @PutMapping("/{id}/desativar")
     @Transactional
     public ResponseEntity desativar(@PathVariable Long id){
         var usuario = repository.getReferenceById(id);
         usuario.desativar();
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Usuário desativado!");
+    }
+
+    @PutMapping("/{id}/reativar")
+    @Transactional
+    public ResponseEntity reativar(@PathVariable Long id){
+        var usuario = repository.getReferenceById(id);
+        usuario.reativar();
+        return ResponseEntity.ok("Usuário reativado!");
     }
 }
