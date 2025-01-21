@@ -5,9 +5,8 @@ import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.Usuario;
 public record UsuarioDadosAposCadastroOuAtualizacaoDTO(
         Long id,
         String nome,
-        String login,
-        String senha) {
+        String login) {
     public UsuarioDadosAposCadastroOuAtualizacaoDTO(Usuario usuario){
-        this(usuario.getId(), usuario.getNome(), usuario.getLogin(), usuario.getSenha());
+        this(usuario.getId(), usuario.getNome(), usuario.getLogin());
     }
 }

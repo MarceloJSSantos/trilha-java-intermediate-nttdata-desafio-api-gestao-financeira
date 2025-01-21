@@ -1,6 +1,7 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.model;
 
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.UsuarioCadastroDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.UsuarioDadosParaAtualizacaoDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -20,10 +21,18 @@ public class Usuario {
     private String nome;
     private String login;
     private String senha;
+    private boolean ativo;
 
     public Usuario(UsuarioCadastroDTO dto) {
         this.nome = dto.nome();
         this.login = dto.login();
         this.senha = dto.senha();
+        this.ativo = true;
+    }
+
+    public void atualizarDados(UsuarioDadosParaAtualizacaoDTO dto) {
+        if(dto.nome() != null) this.nome = dto.nome();
+        if(dto.login() != null) this.login = dto.login();
+        if (dto.senha() != null) this.senha = dto.senha();
     }
 }
