@@ -35,4 +35,8 @@ public class Usuario {
         if(dto.login() != null) this.login = dto.login();
         if (dto.senha() != null) this.senha = dto.senha();
     }
+
+    public void desativar() {
+        this.ativo = false;
+    }
 }

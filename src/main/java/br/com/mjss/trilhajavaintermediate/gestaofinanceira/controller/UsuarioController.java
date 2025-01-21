@@ -41,4 +41,12 @@ public class UsuarioController {
         usuario.atualizarDados(dto);
         return ResponseEntity.ok(new UsuarioDadosAposCadastroOuAtualizacaoDTO(usuario));
     }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity desativar(@PathVariable Long id){
+        var usuario = repository.getReferenceById(id);
+        usuario.desativar();
+        return ResponseEntity.noContent().build();
+    }
 }
