@@ -1,9 +1,12 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.service;
 
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.UsuarioCadastroDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.UsuarioDadosAposCadastroOuAtualizacaoDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.UsuarioDadosParaAtualizacaoDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.exception.ValidacaoException;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.Usuario;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.reposiyory.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,23 +21,42 @@ public class UsuarioService {
         return repository.save(usuario);
     }
 
-    public Usuario consultarUsuario(Long id){
-        return repository.getReferenceById(id);
+    public UsuarioDadosAposCadastroOuAtualizacaoDTO consultarUsuario(Long id){
+        try{
+            var usuario = repository.getReferenceById(id);
+            var dto = new UsuarioDadosAposCadastroOuAtualizacaoDTO(usuario);
+            return dto;
+        } catch (EntityNotFoundException e){
+            throw new EntityNotFoundException("O usuário com ID '%s' não foi encontrado!".formatted(id));
+        }
     }
 
-    public Usuario atualizar(UsuarioDadosParaAtualizacaoDTO dto){
-        var usuario = repository.getReferenceById(dto.id());
-        usuario.atualizarDados(dto);
-        return usuario;
+    public UsuarioDadosAposCadastroOuAtualizacaoDTO atualizar(UsuarioDadosParaAtualizacaoDTO dto){
+        try {
+            var usuario = repository.getReferenceById(dto.id());
+            usuario.atualizarDados(dto);
+            var respostaDto = new UsuarioDadosAposCadastroOuAtualizacaoDTO(usuario);
+            return respostaDto;
+        } catch (EntityNotFoundException e){
+            throw new EntityNotFoundException("O usuário com ID '%s' não foi encontrado!".formatted(dto.id()));
+        }
     }
 
     public void desativar(Long id){
-        var usuario = repository.getReferenceById(id);
-        usuario.desativar();
+        try{
+            var usuario = repository.getReferenceById(id);
+            usuario.desativar();
+        } catch (EntityNotFoundException e){
+            throw new EntityNotFoundException("O usuário com ID '%s' não foi encontrado!".formatted(id));
+        }
     }
     public void reativar(Long id){
-        var usuario = repository.getReferenceById(id);
-        usuario.reativar();;
+        try{
+            var usuario = repository.getReferenceById(id);
+            usuario.reativar();
+        } catch (EntityNotFoundException e){
+            throw new EntityNotFoundException("O usuário com ID '%s' não foi encontrado!".formatted(id));
+        }
     }
 
 }
