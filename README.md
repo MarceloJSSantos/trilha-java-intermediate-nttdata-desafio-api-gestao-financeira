@@ -1,14 +1,14 @@
 # DESAFIO - Trilha Java Intermediate (janeiro/2025) 
 
-## Descrição
+## 📝Descrição
 API de gestão financeira para clientes bancários que permite aos usuários o gerenciamento de suas finanças pessoais.
 
-### Tecnologias
+### 💻Tecnologias
 * Spring Boot 3
 * Java 17
 * MySQL
 
-### Dependências
+### 📚Dependências
 * Spring Web
 * pring Boot DevTools
 * Lombok
@@ -17,3 +17,17 @@ API de gestão financeira para clientes bancários que permite aos usuários o g
 * Flyway Migration
 * MySQL Driver
 * Spring Security
+
+### 🏗️Desenvolvimento
+- [x] Criação do projeto (Spring Initializr)
+- [x] Criação o BD no MySQL (só o banco as tabelas serão criadas com scripts com o FlayWay)
+- [x] Configuração BD/JPA (Inclusão dos parâmetros de acesso ao BD no 'application.properties')
+- [x] Criação as requisições 'Usuário' (Cadastrar, Consultar um Cadastrado, Atualizar, Desativar e Reativar)
+  - [x] Controller
+  - [x] DTOs
+  - [x] Service
+  - [x] Model
+  - [x] Repository
+  - [x] Script BD
+- [x] Criação da classe centralizadora de Tratamento de Erros
+- [ ] Criação as requisições 'Transações'
