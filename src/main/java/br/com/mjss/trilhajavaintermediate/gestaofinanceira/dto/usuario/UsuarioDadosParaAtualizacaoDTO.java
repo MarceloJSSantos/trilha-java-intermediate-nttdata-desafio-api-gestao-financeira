@@ -1,4 +1,4 @@
-package br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto;
+package br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.usuario;
 
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;

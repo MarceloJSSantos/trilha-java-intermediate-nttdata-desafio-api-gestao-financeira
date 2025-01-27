@@ -1,6 +1,6 @@
-package br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto;
+package br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.usuario;
 
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.Usuario;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.usuario.Usuario;
 
 public record UsuarioDadosAposCadastroOuAtualizacaoDTO(
         Long id,

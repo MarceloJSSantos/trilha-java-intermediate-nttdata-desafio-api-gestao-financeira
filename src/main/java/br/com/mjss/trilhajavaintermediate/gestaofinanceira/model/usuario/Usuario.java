@@ -1,7 +1,7 @@
-package br.com.mjss.trilhajavaintermediate.gestaofinanceira.model;
+package br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.usuario;
 
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.UsuarioCadastroDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.UsuarioDadosParaAtualizacaoDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.usuario.UsuarioCadastroDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.usuario.UsuarioDadosParaAtualizacaoDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;

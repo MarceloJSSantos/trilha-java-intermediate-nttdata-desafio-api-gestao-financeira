@@ -1,4 +1,4 @@
-# DESAFIO - Trilha Java Intermediate (janeiro/2025) 
+# 🗂️DESAFIO - Trilha Java Intermediate (janeiro/2025) 
 
 ## 📝Descrição
 API de gestão financeira para clientes bancários que permite aos usuários o gerenciamento de suas finanças pessoais.

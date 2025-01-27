@@ -1,10 +1,9 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.service;
 
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.UsuarioCadastroDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.UsuarioDadosAposCadastroOuAtualizacaoDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.UsuarioDadosParaAtualizacaoDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.exception.ValidacaoException;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.Usuario;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.usuario.UsuarioCadastroDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.usuario.UsuarioDadosAposCadastroOuAtualizacaoDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.usuario.UsuarioDadosParaAtualizacaoDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.usuario.Usuario;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.reposiyory.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;

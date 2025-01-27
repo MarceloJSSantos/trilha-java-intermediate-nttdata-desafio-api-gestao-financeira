@@ -1,8 +1,8 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.controller;
 
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.UsuarioCadastroDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.UsuarioDadosAposCadastroOuAtualizacaoDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.UsuarioDadosParaAtualizacaoDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.usuario.UsuarioCadastroDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.usuario.UsuarioDadosAposCadastroOuAtualizacaoDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.usuario.UsuarioDadosParaAtualizacaoDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
