@@ -4,7 +4,7 @@ import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.usuario.UsuarioCa
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.usuario.UsuarioDadosAposCadastroOuAtualizacaoDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.usuario.UsuarioDadosParaAtualizacaoDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.usuario.Usuario;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.reposiyory.UsuarioRepository;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

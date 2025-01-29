@@ -1,4 +1,21 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao;
 
-public interface Metodo {
+public enum Metodo {
+    TRANSFERENCIA(TipoTransacao.RECEITA),
+    OUTRO_DE_RECEITA(TipoTransacao.RECEITA),
+
+    CARTAO_CREDITO(TipoTransacao.DESPESA),
+    CARTAO_DEBITO(TipoTransacao.DESPESA),
+    PIX(TipoTransacao.DESPESA),
+    OUTRO_DE_DESPESA(TipoTransacao.DESPESA);
+
+    private final TipoTransacao tipo;
+
+    Metodo(TipoTransacao tipo) {
+        this.tipo = tipo;
+    }
+
+    public TipoTransacao getTipo() {
+        return tipo;
+    }
 }
