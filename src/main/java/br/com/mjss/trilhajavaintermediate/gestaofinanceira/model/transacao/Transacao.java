@@ -37,8 +37,6 @@ public class Transacao {
     @Enumerated(EnumType.STRING)
     private Metodo metodo;
 
-    private BigDecimal saldo;
-
     @ManyToOne(fetch = FetchType.LAZY)
     private Usuario usuario;
 
@@ -49,7 +47,6 @@ public class Transacao {
         this.descricao = dto.descricao();
         this.valor = dto.valor();
         setMetodo(dto.metodo());
-        this.saldo = dto.valor();
         this.usuario = usuario;
     }
 
@@ -85,12 +82,14 @@ public class Transacao {
         this.metodo = metodo;
     }
 
-    public void setSaldo(BigDecimal saldoAnterior, BigDecimal valorAtual, TipoTransacao tipo){
-        var seNaoTipoTransacaoReceitaEValorAtualPositivo = !(tipo.equals(TipoTransacao.RECEITA) && valorAtual.signum() == 1);
-        if (seNaoTipoTransacaoReceitaEValorAtualPositivo){
+    public void validaSeSaldoAdequadoComTipo(BigDecimal valorAtual, TipoTransacao tipo){
+        var seTipoTransacaoReceita = tipo.equals(TipoTransacao.RECEITA);
+        var seValorAtualPositivo = valorAtual.signum() == 1;
+        var seValorAtualZero = valorAtual.signum() == 0;
+        var seTipoTransacaoReceitaEValorAtualPositivo = (seTipoTransacaoReceita == seValorAtualPositivo);
+        if (!seTipoTransacaoReceitaEValorAtualPositivo || seValorAtualZero){
             throw new IllegalArgumentException("O valor %f não é apropriado para o tipo de transação %s.".formatted(valorAtual, tipo));
         }
-        this.saldo = saldoAnterior.add(valorAtual);
     }
 
 }

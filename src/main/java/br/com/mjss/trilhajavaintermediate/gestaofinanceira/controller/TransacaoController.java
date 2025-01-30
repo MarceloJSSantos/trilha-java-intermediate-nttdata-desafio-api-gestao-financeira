@@ -36,19 +36,14 @@ public class TransacaoController {
         var usuario = usuarioRepository.getReferenceById(dto.idUsuario());
         var transacao = new Transacao(usuario, dto);
 
-        var resultado = repository.findTopSaldoJQPL(usuario);
-        var seNaoExisteUsuario = !(repository.existsById(dto.idUsuario()));
-        var seExisteSaldoAnterior = resultado.isPresent();
+        var seExisteUsuario = (usuarioRepository.existsById(dto.idUsuario()));
         var saldoAnterior = new BigDecimal(0);
 
-        if (seNaoExisteUsuario){
+        if (!seExisteUsuario){
             throw new IllegalArgumentException("O ID %d não corresponde a nenhum usuário.".formatted(dto.idUsuario()));
         }
-        if(seExisteSaldoAnterior){
-            saldoAnterior = resultado.get();
-        }
 
-        transacao.setSaldo(saldoAnterior, dto.valor(), dto.tipo());
+        transacao.validaSeSaldoAdequadoComTipo(dto.valor(), dto.tipo());
         repository.save(transacao);
         return ResponseEntity.ok().build();
     }
