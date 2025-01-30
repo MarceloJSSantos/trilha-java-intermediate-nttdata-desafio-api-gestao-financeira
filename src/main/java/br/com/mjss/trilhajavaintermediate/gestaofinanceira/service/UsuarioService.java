@@ -41,18 +41,20 @@ public class UsuarioService {
         }
     }
 
-    public void desativar(Long id){
+    public UsuarioDadosAposCadastroOuAtualizacaoDTO desativar(Long id){
         try{
             var usuario = repository.getReferenceById(id);
             usuario.desativar();
+            return new UsuarioDadosAposCadastroOuAtualizacaoDTO(usuario);
         } catch (EntityNotFoundException e){
             throw new EntityNotFoundException("O usuário com ID '%s' não foi encontrado!".formatted(id));
         }
     }
-    public void reativar(Long id){
+    public UsuarioDadosAposCadastroOuAtualizacaoDTO reativar(Long id){
         try{
             var usuario = repository.getReferenceById(id);
             usuario.reativar();
+            return new UsuarioDadosAposCadastroOuAtualizacaoDTO(usuario);
         } catch (EntityNotFoundException e){
             throw new EntityNotFoundException("O usuário com ID '%s' não foi encontrado!".formatted(id));
         }

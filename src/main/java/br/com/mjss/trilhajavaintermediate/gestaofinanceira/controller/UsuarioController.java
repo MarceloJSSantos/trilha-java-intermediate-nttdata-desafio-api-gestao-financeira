@@ -42,14 +42,14 @@ public class UsuarioController {
     @PutMapping("/{id}/desativar")
     @Transactional
     public ResponseEntity desativar(@PathVariable Long id){
-        service.desativar(id);
-        return ResponseEntity.ok("Usuário desativado!");
+        var respostaDTO = service.desativar(id);
+        return ResponseEntity.ok(respostaDTO);
     }
 
     @PutMapping("/{id}/reativar")
     @Transactional
     public ResponseEntity reativar(@PathVariable Long id){
-        service.reativar(id);
-        return ResponseEntity.ok("Usuário reativado!");
+        var respostaDTO = service.reativar(id);
+        return ResponseEntity.ok(respostaDTO);
     }
 }

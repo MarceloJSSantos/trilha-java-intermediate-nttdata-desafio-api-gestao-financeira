@@ -31,3 +31,6 @@ API de gestão financeira para clientes bancários que permite aos usuários o g
   - [x] Script BD
 - [x] Criação da classe centralizadora de Tratamento de Erros
 - [ ] Criação as requisições 'Transações'
+
+### 🗃️Collection Postman
+[trilha-java-intermediate.postman_collection.json](arquivos/trilha-java-intermediate.postman_collection.json)

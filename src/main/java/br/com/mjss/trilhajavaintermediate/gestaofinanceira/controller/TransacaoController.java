@@ -1,50 +1,33 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.controller;
 
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoCadastroDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.Transacao;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.TransacaoRepository;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.UsuarioRepository;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoDadosAposCadastroOuAtualizacaoDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.service.TransacaoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.math.BigDecimal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("transacoes")
 public class TransacaoController {
 
     @Autowired
-    private TransacaoRepository repository;
-
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private TransacaoService service;
 
     @PostMapping
     @Transactional
-    public ResponseEntity cadastrar(@RequestBody @Valid TransacaoCadastroDTO dto
-//            , UriComponentsBuilder uriBuilder
-            ){
-//        var usuario = service.cadastrar(dto);
-//        var uri = uriBuilder.path("/usuarios/{id}").buildAndExpand(usuario.getId()).toUri();
-//        return ResponseEntity.created(uri).body(new UsuarioDadosAposCadastroOuAtualizacaoDTO(usuario));
-        var usuario = usuarioRepository.getReferenceById(dto.idUsuario());
-        var transacao = new Transacao(usuario, dto);
+    public ResponseEntity cadastrar(@RequestBody @Valid TransacaoCadastroDTO dto, UriComponentsBuilder uriBuilder){
+        var transacao = service.cadastrar(dto);
+        var uri = uriBuilder.path("/usuarios/{id}").buildAndExpand(transacao.getId()).toUri();
+        return ResponseEntity.created(uri).body(new TransacaoDadosAposCadastroOuAtualizacaoDTO(transacao));
+    }
 
-        var seExisteUsuario = (usuarioRepository.existsById(dto.idUsuario()));
-        var saldoAnterior = new BigDecimal(0);
-
-        if (!seExisteUsuario){
-            throw new IllegalArgumentException("O ID %d não corresponde a nenhum usuário.".formatted(dto.idUsuario()));
-        }
-
-        transacao.validaSeSaldoAdequadoComTipo(dto.valor(), dto.tipo());
-        repository.save(transacao);
-        return ResponseEntity.ok().build();
+    @GetMapping("/{id}")
+    public ResponseEntity consultarTransacao(@PathVariable Long id){
+        var respostaDTO = service.consultarTransacao(id);
+        return ResponseEntity.ok(respostaDTO);
     }
 }

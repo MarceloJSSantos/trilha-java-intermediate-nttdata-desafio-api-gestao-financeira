@@ -1,0 +1,202 @@
+{
+	"info": {
+		"_postman_id": "2af0ef24-e081-4529-aedf-96a11438de8c",
+		"name": "Trilha Java Intermediate",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6169709"
+	},
+	"item": [
+		{
+			"name": "Usuarios",
+			"item": [
+				{
+					"name": "Cadastrar Usuário",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"Marina Silva\",\r\n    \"login\": \"marina-silva@email.com\",\r\n    \"senha\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/usuarios",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"usuarios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Usuário",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n     \"id\": 43,\r\n    \"login\": \"marina.silva@email.com.br\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/usuarios",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"usuarios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar Dados Usuario",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/usuarios/42",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"usuarios",
+								"42"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Desativar Usuario",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/usuarios/43/desativar",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"usuarios",
+								"43",
+								"desativar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reativar Usuario",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/usuarios/43/reativar",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"usuarios",
+								"43",
+								"reativar"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Diversos",
+			"item": [
+				{
+					"name": "Oi",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/oi",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"oi"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "transacoes",
+			"item": [
+				{
+					"name": "Consultar Dados Transacao",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/transacoes/30",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"transacoes",
+								"30"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar Transação",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"dataHoraTransacao\": \"30/01/2025 14:25:59\",\r\n    \"tipo\": \"DESPESA\",\r\n    \"categoria\": \"ALIMENTACAO\",\r\n    \"descricao\": \"hortifrutti semanal\",\r\n    \"valor\": -125.47,\r\n    \"metodo\": \"CARTAO_CREDITO\",\r\n    \"idUsuario\": 7\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/transacoes",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"transacoes"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
