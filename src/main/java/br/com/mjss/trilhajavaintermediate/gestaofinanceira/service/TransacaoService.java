@@ -42,5 +42,13 @@ public class TransacaoService {
             throw new EntityNotFoundException("A transação com ID '%s' não foi encontrado!".formatted(id));
         }
     }
+
+    public void excluirTransacao(Long id){
+        if (repository.existsById(id))
+            repository.deleteById(id);
+        else {
+            throw new EntityNotFoundException("A transação com ID '%s' não foi encontrado!".formatted(id));
+        }
+    }
 }
 

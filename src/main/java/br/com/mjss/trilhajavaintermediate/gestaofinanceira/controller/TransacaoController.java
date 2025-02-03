@@ -21,7 +21,7 @@ public class TransacaoController {
     @Transactional
     public ResponseEntity cadastrar(@RequestBody @Valid TransacaoCadastroDTO dto, UriComponentsBuilder uriBuilder){
         var transacao = service.cadastrar(dto);
-        var uri = uriBuilder.path("/usuarios/{id}").buildAndExpand(transacao.getId()).toUri();
+        var uri = uriBuilder.path("/transacoes/{id}").buildAndExpand(transacao.getId()).toUri();
         return ResponseEntity.created(uri).body(new TransacaoDadosAposCadastroOuAtualizacaoDTO(transacao));
     }
 
@@ -29,5 +29,12 @@ public class TransacaoController {
     public ResponseEntity consultarTransacao(@PathVariable Long id){
         var respostaDTO = service.consultarTransacao(id);
         return ResponseEntity.ok(respostaDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity excluirTransacao(@PathVariable Long id){
+        service.excluirTransacao(id);
+        return ResponseEntity.noContent().build();
     }
 }
