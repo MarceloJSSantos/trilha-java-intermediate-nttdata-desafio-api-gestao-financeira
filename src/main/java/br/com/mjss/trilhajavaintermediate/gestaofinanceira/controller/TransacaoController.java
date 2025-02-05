@@ -1,5 +1,6 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.controller;
 
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoAtualizacaoDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoCadastroDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoDadosAposCadastroOuAtualizacaoDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoDadosListagemDTO;
@@ -51,5 +52,12 @@ public class TransacaoController {
         Pageable paginacao = PageRequest.of(page, size, Sort.by("id").ascending());
         var respotaPaginada = service.listarTransacoesDeUsuario(paginacao, usuarioId);
         return ResponseEntity.ok(respotaPaginada);
+    }
+
+    @PutMapping
+    @Transactional
+    public ResponseEntity atualizarTransacao(@RequestBody @Valid TransacaoAtualizacaoDTO dto){
+        var transacao = service.atualizarTransacao(dto);
+        return ResponseEntity.ok(new TransacaoDadosAposCadastroOuAtualizacaoDTO(transacao));
     }
 }

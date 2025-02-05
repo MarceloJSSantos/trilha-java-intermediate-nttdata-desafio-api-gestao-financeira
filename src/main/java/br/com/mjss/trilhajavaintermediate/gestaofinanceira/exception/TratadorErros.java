@@ -60,6 +60,15 @@ public class TratadorErros {
         return ResponseEntity.badRequest().body(errorJson);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity trataErro500(IllegalArgumentException e){
+        ObjectNode errorJson = objectMapper.createObjectNode();
+        errorJson.put("erro", e.getClass().getSimpleName());
+        errorJson.put("mensagem", e.getMessage());
+
+        return ResponseEntity.badRequest().body(errorJson);
+    }
+
     private record DadosErroValidacao(String campo, String mensagem){
         public DadosErroValidacao(FieldError error){
             this(error.getField(), error.getDefaultMessage());

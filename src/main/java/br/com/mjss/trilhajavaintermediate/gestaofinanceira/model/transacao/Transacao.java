@@ -1,5 +1,6 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao;
 
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoAtualizacaoDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoCadastroDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.usuario.Usuario;
 import jakarta.persistence.*;
@@ -43,53 +44,19 @@ public class Transacao {
     public Transacao(Usuario usuario, TransacaoCadastroDTO dto) {
         this.dataHoraTransacao = dto.dataHoraTransacao();
         this.tipo = dto.tipo();
-        setCategoria(dto.categoria());
+        this.categoria = dto.categoria();
         this.descricao = dto.descricao();
         this.valor = dto.valor();
-        setMetodo(dto.metodo());
+        this.metodo = dto.metodo();
         this.usuario = usuario;
     }
 
-    private void setCategoria(Categoria categoria) {
-        var seTipoTransacaoEDespesa = (this.tipo == TipoTransacao.DESPESA);
-        var seTipoDaCategoriaNaoEDespesa = !categoria.getTipo().equals(TipoTransacao.DESPESA);
-
-        var seTipoTransacaoEReceita = (this.tipo == TipoTransacao.RECEITA);
-        var seTipoDaCategoriaNaoEReceita = !categoria.getTipo().equals(TipoTransacao.RECEITA);
-
-        // Verifique se o tipo e a categoria são compatíveis
-        if (seTipoTransacaoEDespesa && seTipoDaCategoriaNaoEDespesa) {
-            throw new IllegalArgumentException("Categoria " + categoria + " é inválida para tipo DESPESA.");
-        } else if (seTipoTransacaoEReceita && seTipoDaCategoriaNaoEReceita) {
-            throw new IllegalArgumentException("Categoria " + categoria + " é inválida para tipo RECEITA.");
-        }
-        this.categoria = categoria;
+    public void atualizarTransacao(TransacaoAtualizacaoDTO dto) {
+        if(dto.dataHoraTransacao() != null) this.dataHoraTransacao = dto.dataHoraTransacao();
+        if(dto.tipo() != null) this.tipo = dto.tipo();
+        if(dto.categoria() != null) this.categoria = dto.categoria();
+        if (dto.descricao() != null) this.descricao = dto.descricao();
+        if (dto.valor() != null) this.valor = dto.valor();
+        if (dto.metodo() != null) this.metodo = dto.metodo();
     }
-
-    private void setMetodo(Metodo metodo) {
-        var seTipoTransacaoEDespesa = (this.tipo == TipoTransacao.DESPESA);
-        var seTipoDoMetodoNaoEDespesa = !metodo.getTipo().equals(TipoTransacao.DESPESA);
-
-        var seTipoTransacaoEReceita = (this.tipo == TipoTransacao.RECEITA);
-        var seTipoDoMetodoNaoEReceita = !metodo.getTipo().equals(TipoTransacao.RECEITA);
-
-        // Verifique se o tipo e o método são compatíveis
-        if (seTipoTransacaoEDespesa && seTipoDoMetodoNaoEDespesa) {
-            throw new IllegalArgumentException("Método " + metodo + " é inválido para tipo DESPESA.");
-        } else if (seTipoTransacaoEReceita && seTipoDoMetodoNaoEReceita) {
-            throw new IllegalArgumentException("Método " + metodo + " é inválido para tipo RECEITA.");
-        }
-        this.metodo = metodo;
-    }
-
-    public void validaSeSaldoAdequadoComTipo(BigDecimal valorAtual, TipoTransacao tipo){
-        var seTipoTransacaoReceita = tipo.equals(TipoTransacao.RECEITA);
-        var seValorAtualPositivo = valorAtual.signum() == 1;
-        var seValorAtualZero = valorAtual.signum() == 0;
-        var seTipoTransacaoReceitaEValorAtualPositivo = (seTipoTransacaoReceita == seValorAtualPositivo);
-        if (!seTipoTransacaoReceitaEValorAtualPositivo || seValorAtualZero){
-            throw new IllegalArgumentException("O valor %f não é apropriado para o tipo de transação %s.".formatted(valorAtual, tipo));
-        }
-    }
-
 }

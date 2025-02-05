@@ -1,16 +1,23 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.service;
 
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoAtualizacaoDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoCadastroDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoDadosAposCadastroOuAtualizacaoDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoDadosListagemDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.Categoria;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.Metodo;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.TipoTransacao;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.Transacao;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.TransacaoRepository;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 
 @Service
 public class TransacaoService {
@@ -31,7 +38,9 @@ public class TransacaoService {
             throw new IllegalArgumentException("O ID %d não corresponde a nenhum usuário.".formatted(dto.idUsuario()));
         }
 
-        transacao.validaSeSaldoAdequadoComTipo(dto.valor(), dto.tipo());
+        validaSeMetodoAdequadoComTipo(dto.tipo(), dto.metodo());
+        validaSeCategoriaAdequadaComTipo(dto.tipo(), dto.categoria());
+        validaSeValorAdequadoComTipo(dto.valor(), dto.tipo());
 
         return repository.save(transacao);
     }
@@ -64,5 +73,93 @@ public class TransacaoService {
             throw new EntityNotFoundException("O usuário com ID '%s' não foi encontrado!".formatted(usuarioId));
         }
     }
-}
 
+    public Transacao atualizarTransacao(@Valid TransacaoAtualizacaoDTO dto) {
+        final String MENSAGEM_EXCEPTION = "Para atualizar 'tipo' ou 'categoria' ou 'metodo' ou 'valor' todos tem que ser enviados!";
+        try {
+            var transacao = repository.getReferenceById(dto.id());
+
+            var seTipoOuCategoriaENull = (dto.tipo() == null || dto.categoria() == null);
+            var seTipoECategoriaNaoENull = !(dto.tipo() == null && dto.categoria() == null);
+            if(seTipoECategoriaNaoENull){
+                if(seTipoOuCategoriaENull){
+                    throw new IllegalArgumentException(MENSAGEM_EXCEPTION);
+                }
+            }
+
+            var seTipoOuMetodoENull = (dto.tipo() == null || dto.metodo() == null);
+            var seTipoEMetodoNaoENull = !(dto.tipo() == null && dto.metodo() == null);
+            if (seTipoEMetodoNaoENull){
+                if(seTipoOuMetodoENull){
+                    throw new IllegalArgumentException(MENSAGEM_EXCEPTION);
+                }
+            }
+
+            var seTipoOuValorENull = (dto.tipo() == null || dto.valor() == null);
+            var seTipoEValorNaoENull = !(dto.tipo() == null && dto.valor() == null);
+            if(seTipoEValorNaoENull){
+                if(seTipoOuValorENull){
+                    throw new IllegalArgumentException(MENSAGEM_EXCEPTION);
+                }
+            }
+
+            var seTipoECategoriaNaoSaoNull = (dto.tipo() != null && dto.categoria() != null);
+            if (seTipoECategoriaNaoSaoNull){
+                validaSeCategoriaAdequadaComTipo(dto.tipo(), dto.categoria());
+            }
+
+            var seTipoEMetodoNaoSaoNull = (dto.tipo() != null && dto.metodo() != null);
+            if (seTipoEMetodoNaoSaoNull){
+                validaSeMetodoAdequadoComTipo(dto.tipo(), dto.metodo());
+            }
+
+            var seTipoEValorNaoSaoNull = (dto.tipo() != null && dto.valor() != null);
+            if(seTipoEValorNaoSaoNull){
+                validaSeValorAdequadoComTipo(dto.valor(), dto.tipo());
+            }
+
+            transacao.atualizarTransacao(dto);
+
+            return transacao;
+        } catch (EntityNotFoundException e){
+            throw new EntityNotFoundException("A transação com ID '%s' não foi encontrado!".formatted(dto.id()));
+        }
+    }
+
+    private void validaSeCategoriaAdequadaComTipo(TipoTransacao tipo, Categoria categoria){
+        var seTipoTransacaoEDespesaEseTipoDaCategoriaNaoEDespesa = (tipo == TipoTransacao.DESPESA && !categoria.getTipo().equals(TipoTransacao.DESPESA));
+        var seTipoTransacaoEReceitaEseTipoDaCategoriaNaoEReceita = (tipo == TipoTransacao.RECEITA && !categoria.getTipo().equals(TipoTransacao.RECEITA));
+        var mensagem = "Categoria %s é inválida para tipo %s.".formatted(categoria, tipo);
+
+        if (seTipoTransacaoEDespesaEseTipoDaCategoriaNaoEDespesa) {
+            throw new IllegalArgumentException(mensagem);
+        } else if (seTipoTransacaoEReceitaEseTipoDaCategoriaNaoEReceita) {
+            throw new IllegalArgumentException(mensagem);
+        }
+    }
+
+    private void validaSeMetodoAdequadoComTipo(TipoTransacao tipo, Metodo metodo){
+        var seTipoTransacaoEDespesaEseTipoDoMetodoNaoEDespesa = (tipo == TipoTransacao.DESPESA && !metodo.getTipo().equals(TipoTransacao.DESPESA));
+        var seTipoTransacaoEReceitaEseTipoDoMetodoNaoEReceita = (tipo == TipoTransacao.RECEITA && !metodo.getTipo().equals(TipoTransacao.RECEITA));
+        var mensagem = "Metodo %s é inválido para tipo %s.".formatted(metodo, tipo);
+
+        if (seTipoTransacaoEDespesaEseTipoDoMetodoNaoEDespesa) {
+            throw new IllegalArgumentException(mensagem);
+        } else if (seTipoTransacaoEReceitaEseTipoDoMetodoNaoEReceita) {
+            throw new IllegalArgumentException(mensagem);
+        }
+    }
+
+    private void validaSeValorAdequadoComTipo(BigDecimal valorAtual, TipoTransacao tipo){
+        var seTipoTransacaoReceita = tipo.equals(TipoTransacao.RECEITA);
+        var seValorAtualPositivo = valorAtual.signum() == 1;
+        var seValorAtualZero = valorAtual.signum() == 0;
+        var seTipoTransacaoReceitaEValorAtualPositivo = (seTipoTransacaoReceita == seValorAtualPositivo);
+        var mensagem = "O 'valor' %.2f não é apropriado para o 'tipo' %s.".formatted(valorAtual, tipo);
+
+        if (!seTipoTransacaoReceitaEValorAtualPositivo || seValorAtualZero){
+            throw new IllegalArgumentException(mensagem);
+        }
+    }
+
+}
