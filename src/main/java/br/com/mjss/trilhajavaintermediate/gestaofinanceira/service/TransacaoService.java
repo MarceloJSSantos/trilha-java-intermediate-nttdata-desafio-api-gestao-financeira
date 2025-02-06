@@ -1,13 +1,8 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.service;
 
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoAtualizacaoDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoCadastroDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoDadosAposCadastroOuAtualizacaoDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoDadosListagemDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.Categoria;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.Metodo;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.TipoTransacao;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.Transacao;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.*;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.*;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.TransacaoComSaldoViewRepository;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.TransacaoRepository;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,18 +21,16 @@ public class TransacaoService {
     private TransacaoRepository repository;
 
     @Autowired
+    private TransacaoComSaldoViewRepository repositoryTransacaoComSaldo;
+
+    @Autowired
     private UsuarioRepository usuarioRepository;
 
     public Transacao cadastrar(TransacaoCadastroDTO dto){
         var usuario = usuarioRepository.getReferenceById(dto.idUsuario());
         var transacao = new Transacao(usuario, dto);
 
-        var seExisteUsuario = (usuarioRepository.existsById(dto.idUsuario()));
-
-        if (!seExisteUsuario){
-            throw new IllegalArgumentException("O ID %d não corresponde a nenhum usuário.".formatted(dto.idUsuario()));
-        }
-
+        validaSeUsuarioExiste(dto.idUsuario());
         validaSeMetodoAdequadoComTipo(dto.tipo(), dto.metodo());
         validaSeCategoriaAdequadaComTipo(dto.tipo(), dto.categoria());
         validaSeValorAdequadoComTipo(dto.valor(), dto.tipo());
@@ -68,6 +61,17 @@ public class TransacaoService {
             var usuario = usuarioRepository.getReferenceById(usuarioId);
             var listaPaginada = repository.findAllByUsuario(paginacao, usuario)
                     .map(TransacaoDadosListagemDTO::new);
+            return listaPaginada;
+        } else{
+            throw new EntityNotFoundException("O usuário com ID '%s' não foi encontrado!".formatted(usuarioId));
+        }
+    }
+
+    public Page<TransacaoComSaldoDadosListagemDTO> listarTransacoesComSaldoDeUsuario(Pageable paginacao, Long usuarioId) {
+        if (usuarioRepository.existsById(usuarioId)){
+            var usuario = usuarioRepository.getReferenceById(usuarioId);
+            var listaPaginada = repositoryTransacaoComSaldo.findAllByUsuario(paginacao, usuario)
+                    .map(TransacaoComSaldoDadosListagemDTO::new);
             return listaPaginada;
         } else{
             throw new EntityNotFoundException("O usuário com ID '%s' não foi encontrado!".formatted(usuarioId));
@@ -123,6 +127,14 @@ public class TransacaoService {
             return transacao;
         } catch (EntityNotFoundException e){
             throw new EntityNotFoundException("A transação com ID '%s' não foi encontrado!".formatted(dto.id()));
+        }
+    }
+
+    private void validaSeUsuarioExiste(Long idUsuario) {
+        var seExisteUsuario = (usuarioRepository.existsById(idUsuario));
+
+        if (!seExisteUsuario){
+            throw new IllegalArgumentException("O ID %d não corresponde a nenhum usuário.".formatted(idUsuario));
         }
     }
 

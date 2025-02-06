@@ -1,9 +1,6 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.controller;
 
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoAtualizacaoDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoCadastroDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoDadosAposCadastroOuAtualizacaoDTO;
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.TransacaoDadosListagemDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.*;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.service.TransacaoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +48,16 @@ public class TransacaoController {
             @PathVariable Long usuarioId){
         Pageable paginacao = PageRequest.of(page, size, Sort.by("id").ascending());
         var respotaPaginada = service.listarTransacoesDeUsuario(paginacao, usuarioId);
+        return ResponseEntity.ok(respotaPaginada);
+    }
+
+    @GetMapping("/listarcomsaldo/{usuarioId}")
+    public ResponseEntity<Page<TransacaoComSaldoDadosListagemDTO>> listarTransacoesComSaldoDeUsuario(
+            @RequestParam(defaultValue = "0") int page,  // Página padrão 0
+            @RequestParam(defaultValue = "10") int size,
+            @PathVariable Long usuarioId){
+        Pageable paginacao = PageRequest.of(page, size, Sort.by("id").ascending());
+        var respotaPaginada = service.listarTransacoesComSaldoDeUsuario(paginacao, usuarioId);
         return ResponseEntity.ok(respotaPaginada);
     }
 
