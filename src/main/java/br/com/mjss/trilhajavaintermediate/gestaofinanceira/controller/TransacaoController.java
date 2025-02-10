@@ -4,7 +4,6 @@ import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.*;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.service.TransacaoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -41,23 +40,15 @@ public class TransacaoController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/listar/{usuarioId}")
-    public ResponseEntity<Page<TransacaoDadosListagemDTO>> listarTransacoesDeUsuario(
-            @RequestParam(defaultValue = "0") int page,  // Página padrão 0
+    @GetMapping("/listarcomsaldoporperiodo/{usuarioId}")
+    public ResponseEntity<TransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO> listarTransacoesComSaldoDeUsuarioPorPeriodo(
+            @RequestParam(required = false) String dataInicial,
+            @RequestParam(required = false) String dataFinal,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @PathVariable Long usuarioId){
-        Pageable paginacao = PageRequest.of(page, size, Sort.by("id").ascending());
-        var respotaPaginada = service.listarTransacoesDeUsuario(paginacao, usuarioId);
-        return ResponseEntity.ok(respotaPaginada);
-    }
-
-    @GetMapping("/listarcomsaldo/{usuarioId}")
-    public ResponseEntity<Page<TransacaoComSaldoDadosListagemDTO>> listarTransacoesComSaldoDeUsuario(
-            @RequestParam(defaultValue = "0") int page,  // Página padrão 0
-            @RequestParam(defaultValue = "10") int size,
-            @PathVariable Long usuarioId){
-        Pageable paginacao = PageRequest.of(page, size, Sort.by("id").ascending());
-        var respotaPaginada = service.listarTransacoesComSaldoDeUsuario(paginacao, usuarioId);
+        Pageable paginacao = PageRequest.of(page, size, Sort.by("dataHoraTransacao", "id").descending());
+        var respotaPaginada = service.listarTransacoesComSaldoDeUsuarioPorPeriodo(paginacao, usuarioId, dataInicial, dataFinal);
         return ResponseEntity.ok(respotaPaginada);
     }
 

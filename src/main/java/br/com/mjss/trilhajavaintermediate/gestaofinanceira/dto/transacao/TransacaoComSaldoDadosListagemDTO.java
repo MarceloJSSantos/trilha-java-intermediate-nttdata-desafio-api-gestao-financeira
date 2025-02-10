@@ -15,12 +15,11 @@ public record TransacaoComSaldoDadosListagemDTO(
         String descricao,
         BigDecimal valor,
         Metodo metodo,
-        Long usuarioId,
         BigDecimal saldo
 ) {
     public TransacaoComSaldoDadosListagemDTO(TransacaoComSaldoView transacaoComSaldo) {
         this(transacaoComSaldo.getId(), transacaoComSaldo.getDataHoraTransacao(), transacaoComSaldo.getTipo(),
                 transacaoComSaldo.getCategoria(), transacaoComSaldo.getDescricao(), transacaoComSaldo.getValor(),
-                transacaoComSaldo.getMetodo(), transacaoComSaldo.getUsuario().getId(), transacaoComSaldo.getSaldo());
+                transacaoComSaldo.getMetodo(), transacaoComSaldo.getSaldo());
     }
 }

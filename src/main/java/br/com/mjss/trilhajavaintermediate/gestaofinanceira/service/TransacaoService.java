@@ -2,17 +2,20 @@ package br.com.mjss.trilhajavaintermediate.gestaofinanceira.service;
 
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.*;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.*;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.usuario.Usuario;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.TransacaoComSaldoViewRepository;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.TransacaoRepository;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 @Service
 public class TransacaoService {
@@ -56,23 +59,19 @@ public class TransacaoService {
         }
     }
 
-    public Page<TransacaoDadosListagemDTO> listarTransacoesDeUsuario(Pageable paginacao, Long usuarioId) {
+    public TransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO listarTransacoesComSaldoDeUsuarioPorPeriodo(Pageable paginacao, Long usuarioId, String dataInicial, String dataFinal) {
         if (usuarioRepository.existsById(usuarioId)){
             var usuario = usuarioRepository.getReferenceById(usuarioId);
-            var listaPaginada = repository.findAllByUsuario(paginacao, usuario)
-                    .map(TransacaoDadosListagemDTO::new);
-            return listaPaginada;
-        } else{
-            throw new EntityNotFoundException("O usuário com ID '%s' não foi encontrado!".formatted(usuarioId));
-        }
-    }
-
-    public Page<TransacaoComSaldoDadosListagemDTO> listarTransacoesComSaldoDeUsuario(Pageable paginacao, Long usuarioId) {
-        if (usuarioRepository.existsById(usuarioId)){
-            var usuario = usuarioRepository.getReferenceById(usuarioId);
-            var listaPaginada = repositoryTransacaoComSaldo.findAllByUsuario(paginacao, usuario)
+            var dataAtualInicial = converteParaLocalDateTime(dataInicial, false);
+            var dataAtualFinal = converteParaLocalDateTime(dataFinal, true);
+            var listaPaginada = repositoryTransacaoComSaldo.findAllByUsuarioAndDataHoraTransacaoBetween(paginacao, usuario, dataAtualInicial, dataAtualFinal)
                     .map(TransacaoComSaldoDadosListagemDTO::new);
-            return listaPaginada;
+            var dataAnteriorInicial = converteParaLocalDateTime("01/01/1900", false);
+            var dataAnteriorFinal = dataAtualInicial.minusSeconds(1L);
+            var saldoAnterior = getSaldo(usuario, dataAnteriorInicial, dataAnteriorFinal);
+            var saldoAtual = getSaldo(usuario, dataAtualInicial, dataAtualFinal);
+            var resposta = new TransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO(dataInicial, dataFinal, saldoAnterior, saldoAtual, usuarioId, listaPaginada );
+            return resposta;
         } else{
             throw new EntityNotFoundException("O usuário com ID '%s' não foi encontrado!".formatted(usuarioId));
         }
@@ -174,4 +173,28 @@ public class TransacaoService {
         }
     }
 
+    private LocalDateTime converteParaLocalDateTime(String dateString, boolean finalDia) {
+        var horario = (finalDia)?" 23:59:59":" 00:00:00";
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        try {
+            LocalDateTime localDateTime = LocalDateTime.parse(dateString + horario, DateTimeFormatter
+                    .ofPattern("dd/MM/yyyy HH:mm:ss"));
+            return localDateTime;
+        } catch (DateTimeParseException e) {
+            System.err.println("Erro ao parsear a data: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private BigDecimal getSaldo(Usuario usuario, LocalDateTime dataIncial, LocalDateTime dataFinal){
+        var retornoTratado = BigDecimal.ZERO;
+        var saldoAnterior = repositoryTransacaoComSaldo.findTopByUsuarioAndDataHoraTransacaoBetweenOrderByDataHoraTransacaoDescIdDesc(usuario, dataIncial, dataFinal);
+        if (saldoAnterior.isPresent()){
+            retornoTratado = saldoAnterior.get().getSaldo();
+        }
+
+        return retornoTratado;
+    }
 }
