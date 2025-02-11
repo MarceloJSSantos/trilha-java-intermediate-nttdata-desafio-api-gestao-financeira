@@ -7,12 +7,12 @@ import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.TransacaoC
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.TransacaoRepository;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -28,6 +28,8 @@ public class TransacaoService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    DateTimeFormatter formatoDataDDMMAAAA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public Transacao cadastrar(TransacaoCadastroDTO dto){
         var usuario = usuarioRepository.getReferenceById(dto.idUsuario());
@@ -62,22 +64,13 @@ public class TransacaoService {
     public TransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO listarTransacoesComSaldoDeUsuarioPorPeriodo(Pageable paginacao, Long usuarioId, String dataInicial, String dataFinal) {
         if (usuarioRepository.existsById(usuarioId)){
             var usuario = usuarioRepository.getReferenceById(usuarioId);
-            var dataAtualInicial = converteParaLocalDateTime(dataInicial, false);
-            var dataAtualFinal = converteParaLocalDateTime(dataFinal, true);
-            var listaPaginada = repositoryTransacaoComSaldo.findAllByUsuarioAndDataHoraTransacaoBetween(paginacao, usuario, dataAtualInicial, dataAtualFinal)
-                    .map(TransacaoComSaldoDadosListagemDTO::new);
-            var dataAnteriorInicial = converteParaLocalDateTime("01/01/1900", false);
-            var dataAnteriorFinal = dataAtualInicial.minusSeconds(1L);
-            var saldoAnterior = getSaldo(usuario, dataAnteriorInicial, dataAnteriorFinal);
-            var saldoAtual = getSaldo(usuario, dataAtualInicial, dataAtualFinal);
-            var resposta = new TransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO(dataInicial, dataFinal, saldoAnterior, saldoAtual, usuarioId, listaPaginada );
-            return resposta;
+            return getTransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO(paginacao, usuarioId, dataInicial, dataFinal, usuario);
         } else{
             throw new EntityNotFoundException("O usuário com ID '%s' não foi encontrado!".formatted(usuarioId));
         }
     }
 
-    public Transacao atualizarTransacao(@Valid TransacaoAtualizacaoDTO dto) {
+    public Transacao atualizarTransacao(TransacaoAtualizacaoDTO dto) {
         final String MENSAGEM_EXCEPTION = "Para atualizar 'tipo' ou 'categoria' ou 'metodo' ou 'valor' todos tem que ser enviados!";
         try {
             var transacao = repository.getReferenceById(dto.id());
@@ -174,17 +167,23 @@ public class TransacaoService {
     }
 
     private LocalDateTime converteParaLocalDateTime(String dateString, boolean finalDia) {
-        var horario = (finalDia)?" 23:59:59":" 00:00:00";
+        if (dateString == null){
+            if (finalDia){
+                dateString = LocalDate.now().format(formatoDataDDMMAAAA).toString();
+            } else{
+                dateString = "01/01/1900";
+            }
+        }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        var horario = (finalDia)?" 23:59:59":" 00:00:00";
 
         try {
             LocalDateTime localDateTime = LocalDateTime.parse(dateString + horario, DateTimeFormatter
                     .ofPattern("dd/MM/yyyy HH:mm:ss"));
             return localDateTime;
         } catch (DateTimeParseException e) {
-            System.err.println("Erro ao parsear a data: " + e.getMessage());
-            return null;
+            throw new IllegalArgumentException("A data informada '%s' não está no formato válido 'dd/MM/AAAA'."
+                    .formatted(dateString));
         }
     }
 
@@ -196,5 +195,32 @@ public class TransacaoService {
         }
 
         return retornoTratado;
+    }
+
+    private TransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO getTransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO(Pageable paginacao, Long usuarioId, String dataInicial, String dataFinal, Usuario usuario) {
+        var dataAtualInicial = converteParaLocalDateTime(dataInicial, false);
+        var dataAtualFinal = converteParaLocalDateTime(dataFinal, true);
+
+        validaSeDataInicialMenorIgualFinal(dataAtualInicial.toLocalDate(), dataAtualFinal.toLocalDate());
+        var listaPaginada = repositoryTransacaoComSaldo.findAllByUsuarioAndDataHoraTransacaoBetween(paginacao, usuario, dataAtualInicial, dataAtualFinal)
+                .map(TransacaoComSaldoDadosListagemDTO::new);
+        var saldoAtual = getSaldo(usuario, dataAtualInicial, dataAtualFinal);
+
+        var dataAnteriorInicial = converteParaLocalDateTime(null, false);
+        var dataAnteriorFinal = dataAtualInicial.minusSeconds(1L);
+        var saldoAnterior = getSaldo(usuario, dataAnteriorInicial, dataAnteriorFinal);
+
+        var resposta = new TransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO(
+                dataAtualInicial.toLocalDate().format(formatoDataDDMMAAAA).toString(),
+                dataAtualFinal.toLocalDate().format(formatoDataDDMMAAAA).toString(),
+                saldoAnterior, saldoAtual, usuarioId, listaPaginada );
+        return resposta;
+    }
+
+    private void validaSeDataInicialMenorIgualFinal(LocalDate dataInicial, LocalDate dataFinal) {
+        if (dataInicial.isAfter(dataFinal)){
+            throw new IllegalArgumentException("A data inicial '%s' deve ser menor ou igual a data final '%s'."
+                    .formatted(dataInicial.format(formatoDataDDMMAAAA), dataFinal.format(formatoDataDDMMAAAA)));
+        }
     }
 }
