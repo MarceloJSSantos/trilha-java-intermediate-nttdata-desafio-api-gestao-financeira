@@ -34,12 +34,12 @@ public class TratadorErros {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity trataErro400(HttpMessageNotReadableException e){
+    public ResponseEntity trataErro500(HttpMessageNotReadableException e){
         ObjectNode errorJson = objectMapper.createObjectNode();
         errorJson.put("erro", e.getClass().getSimpleName());
         errorJson.put("mensagem", e.getMessage());
 
-        return ResponseEntity.badRequest().body(errorJson);
+        return ResponseEntity.internalServerError().body(errorJson);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
@@ -57,11 +57,11 @@ public class TratadorErros {
         errorJson.put("erro", e.getClass().getSimpleName());
         errorJson.put("mensagem", e.getMessage());
 
-        return ResponseEntity.badRequest().body(errorJson);
+        return ResponseEntity.internalServerError().body(errorJson);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity trataErro500(IllegalArgumentException e){
+    @ExceptionHandler(ValidacaoNegocioException.class)
+    public ResponseEntity trataErro400(ValidacaoNegocioException e){
         ObjectNode errorJson = objectMapper.createObjectNode();
         errorJson.put("erro", e.getClass().getSimpleName());
         errorJson.put("mensagem", e.getMessage());

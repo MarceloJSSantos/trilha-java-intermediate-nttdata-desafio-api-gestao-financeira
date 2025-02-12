@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"nome\": \"Marina Silva\",\r\n    \"login\": \"marina-silva@email.com\",\r\n    \"senha\": \"123456\"\r\n}",
+							"raw": "{\r\n    \"nome\": \"Valber Silva\",\r\n    \"login\": \"mvalber.silva@email.com\",\r\n    \"senha\": \"123456\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -43,7 +43,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n     \"id\": 43,\r\n    \"login\": \"marina.silva@email.com.br\"\r\n}",
+							"raw": "{\r\n     \"id\": 44,\r\n    \"login\": \"luiz.silva@email.com.br\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -69,14 +69,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/usuarios/42",
+							"raw": "localhost:8080/usuarios/44",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
 								"usuarios",
-								"42"
+								"44"
 							]
 						}
 					},
@@ -88,14 +88,14 @@
 						"method": "PUT",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/usuarios/43/desativar",
+							"raw": "localhost:8080/usuarios/44/desativar",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
 								"usuarios",
-								"43",
+								"44",
 								"desativar"
 							]
 						}
@@ -108,14 +108,14 @@
 						"method": "PUT",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/usuarios/43/reativar",
+							"raw": "localhost:8080/usuarios/44/reativar",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
 								"usuarios",
-								"43",
+								"44",
 								"reativar"
 							]
 						}
@@ -148,7 +148,7 @@
 			]
 		},
 		{
-			"name": "transacoes",
+			"name": "Transacoes",
 			"item": [
 				{
 					"name": "Consultar Dados Transacao",
@@ -156,14 +156,75 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/transacoes/30",
+							"raw": "localhost:8080/transacoes/390",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
 								"transacoes",
-								"30"
+								"390"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Transacoes Com Saldo Por Periodo de um Usuario",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/transacoes/listarcomsaldoporperiodo/700?dataInicial=01/02/2025&dataFinal=10/02/2025",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"transacoes",
+								"listarcomsaldoporperiodo",
+								"700"
+							],
+							"query": [
+								{
+									"key": "dataInicial",
+									"value": "01/02/2025"
+								},
+								{
+									"key": "dataFinal",
+									"value": "10/02/2025"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Transacao",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/transacoes/310",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"transacoes",
+								"310"
 							]
 						}
 					},
@@ -176,7 +237,34 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"dataHoraTransacao\": \"30/01/2025 14:25:59\",\r\n    \"tipo\": \"DESPESA\",\r\n    \"categoria\": \"ALIMENTACAO\",\r\n    \"descricao\": \"hortifrutti semanal\",\r\n    \"valor\": -125.47,\r\n    \"metodo\": \"CARTAO_CREDITO\",\r\n    \"idUsuario\": 7\r\n}",
+							"raw": "{\r\n    \"dataHoraTransacao\": \"10/02/2025 16:17:12\",\r\n    \"tipo\": \"RECEITA\",\r\n    \"categoria\": \"SALARIO\",\r\n    \"descricao\": \"\",\r\n    \"valor\": 10584.56,\r\n    \"metodo\": \"TRANSFERENCIA\",\r\n    \"idUsuario\": 7\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/transacoes",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"transacoes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Transação",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 40,\r\n    \"tipo\": \"RECEITA\",\r\n    \"categoria\": \"TRANSPORTE\",\r\n    \"metodo\": \"TRANSFERENCIA\",\r\n    \"valor\": -10600,\r\n    \"descricao\": \"atualização de tipo/categoria/metodo/valor\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"

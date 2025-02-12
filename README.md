@@ -34,17 +34,17 @@ API de gestão financeira para clientes bancários que permite aos usuários o g
   - [x] Repository
   - [x] Script BD
 - [x] Criação da classe centralizadora de Tratamento de Erros
-- [ ] Criação as requisições 'Transações'
+- [x] Criação as requisições 'Transações' (CRUD principal)
   * Cadastrar
   * Consultar uma cadastrada
   * Atualizar
   * Exclusão definitiva
-  - [ ] Controller
-  - [ ] DTOs
-  - [ ] Service
-  - [ ] Model
-  - [ ] Repository
-  - [ ] Script BD
+  - [x] Controller
+  - [x] DTOs
+  - [x] Service
+  - [x] Models
+  - [x] Repositories (tabela e view com saldo)
+  - [x] Scripts BD
 
 ### 🗃️Collection Postman
-- [trilha-java-intermediate.postman_collection.json](arquivos/trilha-java-intermediate.postman_collection.json)
+- [trilha-java-intermediate.postman_collection.json](arquivos/trilha-java-intermediate.postman_collection_ant.json)

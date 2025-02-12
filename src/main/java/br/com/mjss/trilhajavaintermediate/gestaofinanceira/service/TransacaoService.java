@@ -1,6 +1,7 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.service;
 
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.*;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.exception.ValidacaoNegocioException;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.Categoria;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.Metodo;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.TipoTransacao;
@@ -106,14 +107,14 @@ public class TransacaoService {
         var seTipoECategoriaNaoENull = !(dto.tipo() == null && dto.categoria() == null && dto.metodo() == null && dto.valor() == null);
         if (seTipoECategoriaNaoENull) {
             if (seTipoOuCategoriaENull) {
-                throw new IllegalArgumentException("Para atualizar 'tipo' ou 'categoria' ou 'metodo' ou 'valor' todos tem que ser enviados!");
+                throw new ValidacaoNegocioException("Para atualizar 'tipo' ou 'categoria' ou 'metodo' ou 'valor' todos tem que ser enviados!");
             }
         }
     }
 
     private void validaSeDataInicialMenorIgualFinal(LocalDate dataInicial, LocalDate dataFinal) {
         if (dataInicial.isAfter(dataFinal)) {
-            throw new IllegalArgumentException("A data inicial '%s' deve ser menor ou igual a data final '%s'.".formatted(dataInicial.format(formatoDataDDMMAAAA), dataFinal.format(formatoDataDDMMAAAA)));
+            throw new ValidacaoNegocioException("A data inicial '%s' deve ser menor ou igual a data final '%s'.".formatted(dataInicial.format(formatoDataDDMMAAAA), dataFinal.format(formatoDataDDMMAAAA)));
         }
     }
 
@@ -121,7 +122,7 @@ public class TransacaoService {
         var seExisteUsuario = (usuarioRepository.existsById(usuarioId));
 
         if (!seExisteUsuario) {
-            throw new IllegalArgumentException("O usuário com ID '%s' não foi encontrado!".formatted(usuarioId));
+            throw new EntityNotFoundException("O usuário com ID '%s' não foi encontrado!".formatted(usuarioId));
         }
     }
 
@@ -139,9 +140,9 @@ public class TransacaoService {
         var mensagem = "Categoria %s é inválida para tipo %s.".formatted(categoria, tipo);
 
         if (seTipoTransacaoEDespesaEseTipoDaCategoriaNaoEDespesa) {
-            throw new IllegalArgumentException(mensagem);
+            throw new ValidacaoNegocioException(mensagem);
         } else if (seTipoTransacaoEReceitaEseTipoDaCategoriaNaoEReceita) {
-            throw new IllegalArgumentException(mensagem);
+            throw new ValidacaoNegocioException(mensagem);
         }
     }
 
@@ -151,9 +152,9 @@ public class TransacaoService {
         var mensagem = "Metodo %s é inválido para tipo %s.".formatted(metodo, tipo);
 
         if (seTipoTransacaoEDespesaEseTipoDoMetodoNaoEDespesa) {
-            throw new IllegalArgumentException(mensagem);
+            throw new ValidacaoNegocioException(mensagem);
         } else if (seTipoTransacaoEReceitaEseTipoDoMetodoNaoEReceita) {
-            throw new IllegalArgumentException(mensagem);
+            throw new ValidacaoNegocioException(mensagem);
         }
     }
 
@@ -165,7 +166,7 @@ public class TransacaoService {
         var mensagem = "O 'valor' %.2f não é apropriado para o 'tipo' %s.".formatted(valorAtual, tipo);
 
         if (!seTipoTransacaoReceitaEValorAtualPositivo || seValorAtualZero) {
-            throw new IllegalArgumentException(mensagem);
+            throw new ValidacaoNegocioException(mensagem);
         }
     }
 
@@ -178,7 +179,7 @@ public class TransacaoService {
             LocalDateTime localDateTime = LocalDateTime.parse(data + horario, DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
             return localDateTime;
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("A data informada '%s' não está no formato válido 'dd/MM/AAAA'.".formatted(data));
+            throw new ValidacaoNegocioException("A data informada '%s' não está no formato válido 'dd/MM/AAAA'.".formatted(data));
         }
     }
 
