@@ -39,12 +39,19 @@ API de gestão financeira para clientes bancários que permite aos usuários o g
   * Consultar uma cadastrada
   * Atualizar
   * Exclusão definitiva
+  * Lista as transações por Período com saldo atualizado de um usuário
   - [x] Controller
   - [x] DTOs
   - [x] Service
   - [x] Models
   - [x] Repositories (tabela e view com saldo)
   - [x] Scripts BD
+- [x] Criação as requisições 'Resumo de Transações'
+  * Resume as transações por Período, Tipo e Categoria de um usuário
+  * Resume as transações por Período, Tipo e Método de um usuário
+  - [x] Atualização Controller
+  - [x] Criação de DTOs necessários
+  - [x] Atualização Service
 
 ### 🗃️Collection Postman
 - [trilha-java-intermediate.postman_collection.json](arquivos/trilha-java-intermediate.postman_collection_ant.json)

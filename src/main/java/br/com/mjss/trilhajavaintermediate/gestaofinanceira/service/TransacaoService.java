@@ -1,6 +1,10 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.service;
 
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.*;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.resumo.ResumoTransacaoDeUsuarioPorPeriodoTipoCategoriaDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.resumo.ResumoTransacaoDeUsuarioPorPeriodoTipoDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.resumo.ResumoTransacaoDeUsuarioPorPeriodoDTO;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.resumo.ResumoTransacaoDeUsuarioPorPeriodoTipoMetodoDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.exception.ValidacaoNegocioException;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.Categoria;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.Metodo;
@@ -20,6 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.*;
 
 @Service
 public class TransacaoService {
@@ -59,11 +64,11 @@ public class TransacaoService {
         repository.deleteById(id);
     }
 
-    public TransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO listarTransacoesComSaldoDeUsuarioPorPeriodo(Pageable paginacao, Long usuarioId, String dataInicial, String dataFinal) {
+    public TransacaoDadosComSaldoDeUsuarioPorPeriodoDTO listarTransacoesComSaldoDeUsuarioPorPeriodo(Pageable paginacao, Long usuarioId, String dataInicial, String dataFinal) {
         validaSeUsuarioExiste(usuarioId);
 
         var usuario = usuarioRepository.getReferenceById(usuarioId);
-        return getTransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO(paginacao, usuarioId, dataInicial, dataFinal, usuario);
+        return retornaTransacaoDadosComSaldoDeUsuarioPorPeriodoDTO(paginacao, usuarioId, dataInicial, dataFinal, usuario);
     }
 
     public Transacao atualizarTransacao(TransacaoAtualizacaoDTO dto) {
@@ -79,6 +84,20 @@ public class TransacaoService {
         transacao.atualizarTransacao(dto);
 
         return transacao;
+    }
+
+    public ResumoTransacaoDeUsuarioPorPeriodoDTO ResumoDeUsuarioPorPeriodoETipoECategoria(Long usuarioId, String dataInicial, String dataFinal) {
+        validaSeUsuarioExiste(usuarioId);
+
+        var usuario = usuarioRepository.getReferenceById(usuarioId);
+        return retornaResumoTransacaoDeUsuarioPorPeriodoDTOComTipoECategoria(dataInicial, dataFinal, usuario);
+    }
+
+    public ResumoTransacaoDeUsuarioPorPeriodoDTO ResumoDeUsuarioPorPeriodoETipoEMetodo(Long usuarioId, String dataInicial, String dataFinal) {
+        validaSeUsuarioExiste(usuarioId);
+
+        var usuario = usuarioRepository.getReferenceById(usuarioId);
+        return retornaResumoTransacaoDeUsuarioPorPeriodoDTOComTipoEMetodo(dataInicial, dataFinal, usuario);
     }
 
     private void validaSeValorAdequadaComTipoParaAtualizacao(TipoTransacao tipo, BigDecimal valor) {
@@ -102,7 +121,7 @@ public class TransacaoService {
         }
     }
 
-    private static void validaSeTipoCategoriaMetodoValorSaoEnviados(TransacaoAtualizacaoDTO dto) {
+    private void validaSeTipoCategoriaMetodoValorSaoEnviados(TransacaoAtualizacaoDTO dto) {
         var seTipoOuCategoriaENull = (dto.tipo() == null || dto.categoria() == null || dto.metodo() == null || dto.valor() == null);
         var seTipoECategoriaNaoENull = !(dto.tipo() == null && dto.categoria() == null && dto.metodo() == null && dto.valor() == null);
         if (seTipoECategoriaNaoENull) {
@@ -114,7 +133,7 @@ public class TransacaoService {
 
     private void validaSeDataInicialMenorIgualFinal(LocalDate dataInicial, LocalDate dataFinal) {
         if (dataInicial.isAfter(dataFinal)) {
-            throw new ValidacaoNegocioException("A data inicial '%s' deve ser menor ou igual a data final '%s'.".formatted(dataInicial.format(formatoDataDDMMAAAA), dataFinal.format(formatoDataDDMMAAAA)));
+            throw new ValidacaoNegocioException("A data inicial '%s' não pode ser maior que a data final '%s'.".formatted(dataInicial.format(formatoDataDDMMAAAA), dataFinal.format(formatoDataDDMMAAAA)));
         }
     }
 
@@ -171,7 +190,7 @@ public class TransacaoService {
     }
 
     private LocalDateTime converteParaLocalDateTime(String data, boolean finalDia) {
-        data = getData(data, finalDia);
+        data = retornaDataTratada(data, finalDia);
 
         var horario = (finalDia) ? " 23:59:59" : " 00:00:00";
 
@@ -179,11 +198,11 @@ public class TransacaoService {
             LocalDateTime localDateTime = LocalDateTime.parse(data + horario, DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
             return localDateTime;
         } catch (DateTimeParseException e) {
-            throw new ValidacaoNegocioException("A data informada '%s' não está no formato válido 'dd/MM/AAAA'.".formatted(data));
+            throw new ValidacaoNegocioException("A data informada '%s' não está no formato válido 'dd/MM/yyyy'.".formatted(data));
         }
     }
 
-    private String getData(String dataTratada, boolean finalDia) {
+    private String retornaDataTratada(String dataTratada, boolean finalDia) {
         if (dataTratada == null) {
             if (finalDia) {
                 dataTratada = LocalDate.now().format(formatoDataDDMMAAAA);
@@ -194,7 +213,7 @@ public class TransacaoService {
         return dataTratada;
     }
 
-    private BigDecimal getSaldo(Usuario usuario, LocalDateTime dataIncial, LocalDateTime dataFinal) {
+    private BigDecimal retornaSaldo(Usuario usuario, LocalDateTime dataIncial, LocalDateTime dataFinal) {
         var saldoTratado = BigDecimal.ZERO;
         var saldoAnterior = repositoryTransacaoComSaldo.findTopByUsuarioAndDataHoraTransacaoBetweenOrderByDataHoraTransacaoDescIdDesc(usuario, dataIncial, dataFinal);
         if (saldoAnterior.isPresent()) {
@@ -204,19 +223,101 @@ public class TransacaoService {
         return saldoTratado;
     }
 
-    private TransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO getTransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO(Pageable paginacao, Long usuarioId, String dataInicial, String dataFinal, Usuario usuario) {
+    private TransacaoDadosComSaldoDeUsuarioPorPeriodoDTO retornaTransacaoDadosComSaldoDeUsuarioPorPeriodoDTO(Pageable paginacao, Long usuarioId, String dataInicial, String dataFinal, Usuario usuario) {
         var dataAtualInicial = converteParaLocalDateTime(dataInicial, false);
         var dataAtualFinal = converteParaLocalDateTime(dataFinal, true);
 
         validaSeDataInicialMenorIgualFinal(dataAtualInicial.toLocalDate(), dataAtualFinal.toLocalDate());
         var listaPaginada = repositoryTransacaoComSaldo.findAllByUsuarioAndDataHoraTransacaoBetween(paginacao, usuario, dataAtualInicial, dataAtualFinal).map(TransacaoComSaldoDadosListagemDTO::new);
-        var saldoAtual = getSaldo(usuario, dataAtualInicial, dataAtualFinal);
+        var saldoAtual = retornaSaldo(usuario, dataAtualInicial, dataAtualFinal);
 
         var dataAnteriorInicial = converteParaLocalDateTime(null, false);
         var dataAnteriorFinal = dataAtualInicial.minusSeconds(1L);
-        var saldoAnterior = getSaldo(usuario, dataAnteriorInicial, dataAnteriorFinal);
+        var saldoAnterior = retornaSaldo(usuario, dataAnteriorInicial, dataAnteriorFinal);
 
-        var resposta = new TransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO(dataAtualInicial.toLocalDate().format(formatoDataDDMMAAAA), dataAtualFinal.toLocalDate().format(formatoDataDDMMAAAA), saldoAnterior, saldoAtual, usuarioId, listaPaginada);
+        var resposta = new TransacaoDadosComSaldoDeUsuarioPorPeriodoDTO(dataAtualInicial.toLocalDate().format(formatoDataDDMMAAAA), dataAtualFinal.toLocalDate().format(formatoDataDDMMAAAA), saldoAnterior, saldoAtual, usuarioId, listaPaginada);
+        return resposta;
+    }
+
+    private ResumoTransacaoDeUsuarioPorPeriodoDTO retornaResumoTransacaoDeUsuarioPorPeriodoDTOComTipoECategoria(String dataInicial, String dataFinal, Usuario usuario) {
+        var dataAtualInicial = converteParaLocalDateTime(dataInicial, false);
+        var dataAtualFinal = converteParaLocalDateTime(dataFinal, true);
+
+        validaSeDataInicialMenorIgualFinal(dataAtualInicial.toLocalDate(), dataAtualFinal.toLocalDate());
+        var transacoes = repository.findAllByUsuarioAndDataHoraTransacaoBetween(usuario, dataAtualInicial, dataAtualFinal);
+
+        Map<TipoTransacao, ResumoTransacaoDeUsuarioPorPeriodoTipoDTO> resumoMap = new HashMap<>();
+        int quantidadeTransacoes = 0;
+        BigDecimal totalValor = BigDecimal.ZERO;
+
+        for (Transacao transacao : transacoes) {
+            quantidadeTransacoes++;
+            totalValor = totalValor.add(transacao.getValor());
+
+            resumoMap.computeIfAbsent(transacao.getTipo(), tipo -> new ResumoTransacaoDeUsuarioPorPeriodoTipoDTO(tipo, 0, BigDecimal.ZERO));
+
+            ResumoTransacaoDeUsuarioPorPeriodoTipoDTO tipoAtual = resumoMap.get(transacao.getTipo());
+            tipoAtual.setQuantidadeTransacoes(tipoAtual.getQuantidadeTransacoes() + 1);
+            tipoAtual.setTotalValor(tipoAtual.getTotalValor().add(transacao.getValor()));
+
+            Optional<ResumoTransacaoDeUsuarioPorPeriodoTipoCategoriaDTO> categoriaExistente = tipoAtual.getCategorias()
+                    .stream().filter(c -> c.getCategoria() == transacao.getCategoria()).findFirst();
+
+            if (categoriaExistente.isPresent()) {
+                ResumoTransacaoDeUsuarioPorPeriodoTipoCategoriaDTO categoriaDTO = categoriaExistente.get();
+                categoriaDTO.setQuantidadeTransacoes(categoriaDTO.getQuantidadeTransacoes() + 1);
+                categoriaDTO.setTotalValor(categoriaDTO.getTotalValor().add(transacao.getValor()));
+            } else {
+                ResumoTransacaoDeUsuarioPorPeriodoTipoCategoriaDTO novaCategoriaDTO = new ResumoTransacaoDeUsuarioPorPeriodoTipoCategoriaDTO(transacao.getCategoria(), 1, transacao.getValor());
+                tipoAtual.adicionarCategoria(novaCategoriaDTO);
+            }
+        }
+
+        List<ResumoTransacaoDeUsuarioPorPeriodoTipoDTO> tipos = new ArrayList<>(resumoMap.values());
+        var resposta = new ResumoTransacaoDeUsuarioPorPeriodoDTO(dataAtualInicial.toLocalDate().format(formatoDataDDMMAAAA),
+                dataAtualFinal.toLocalDate().format(formatoDataDDMMAAAA), usuario.getId(), quantidadeTransacoes,
+                totalValor, tipos);
+        return resposta;
+    }
+
+    private ResumoTransacaoDeUsuarioPorPeriodoDTO retornaResumoTransacaoDeUsuarioPorPeriodoDTOComTipoEMetodo(String dataInicial, String dataFinal, Usuario usuario) {
+        var dataAtualInicial = converteParaLocalDateTime(dataInicial, false);
+        var dataAtualFinal = converteParaLocalDateTime(dataFinal, true);
+
+        validaSeDataInicialMenorIgualFinal(dataAtualInicial.toLocalDate(), dataAtualFinal.toLocalDate());
+        var transacoes = repository.findAllByUsuarioAndDataHoraTransacaoBetween(usuario, dataAtualInicial, dataAtualFinal);
+
+        Map<TipoTransacao, ResumoTransacaoDeUsuarioPorPeriodoTipoDTO> resumoMap = new HashMap<>();
+        int quantidadeTransacoes = 0;
+        BigDecimal totalValor = BigDecimal.ZERO;
+
+        for (Transacao transacao : transacoes) {
+            quantidadeTransacoes++;
+            totalValor = totalValor.add(transacao.getValor());
+
+            resumoMap.computeIfAbsent(transacao.getTipo(), tipo -> new ResumoTransacaoDeUsuarioPorPeriodoTipoDTO(tipo, 0, BigDecimal.ZERO));
+
+            ResumoTransacaoDeUsuarioPorPeriodoTipoDTO tipoAtual = resumoMap.get(transacao.getTipo());
+            tipoAtual.setQuantidadeTransacoes(tipoAtual.getQuantidadeTransacoes() + 1);
+            tipoAtual.setTotalValor(tipoAtual.getTotalValor().add(transacao.getValor()));
+
+            Optional<ResumoTransacaoDeUsuarioPorPeriodoTipoMetodoDTO> metodoExistente = tipoAtual.getMetodos()
+                    .stream().filter(c -> c.getMetodo() == transacao.getMetodo()).findFirst();
+
+            if (metodoExistente.isPresent()) {
+                ResumoTransacaoDeUsuarioPorPeriodoTipoMetodoDTO metodoDTO = metodoExistente.get();
+                metodoDTO.setQuantidadeTransacoes(metodoDTO.getQuantidadeTransacoes() + 1);
+                metodoDTO.setTotalValor(metodoDTO.getTotalValor().add(transacao.getValor()));
+            } else {
+                ResumoTransacaoDeUsuarioPorPeriodoTipoMetodoDTO novoMetodoDTO = new ResumoTransacaoDeUsuarioPorPeriodoTipoMetodoDTO(transacao.getMetodo(), 1, transacao.getValor());
+                tipoAtual.adicionarMetodo(novoMetodoDTO);
+            }
+        }
+
+        List<ResumoTransacaoDeUsuarioPorPeriodoTipoDTO> tipos = new ArrayList<>(resumoMap.values());
+        var resposta = new ResumoTransacaoDeUsuarioPorPeriodoDTO(dataAtualInicial.toLocalDate().format(formatoDataDDMMAAAA),
+                dataAtualFinal.toLocalDate().format(formatoDataDDMMAAAA), usuario.getId(), quantidadeTransacoes,
+                totalValor, tipos);
         return resposta;
     }
 }

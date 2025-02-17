@@ -187,15 +187,15 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8080/transacoes/listarcomsaldoporperiodo/700?dataInicial=01/02/2025&dataFinal=10/02/2025",
+							"raw": "localhost:8080/transacoes/listar_com_saldo_por_periodo/7?dataInicial=01/02/2025&dataFinal=10/02/2025",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
 								"transacoes",
-								"listarcomsaldoporperiodo",
-								"700"
+								"listar_com_saldo_por_periodo",
+								"7"
 							],
 							"query": [
 								{
@@ -205,6 +205,90 @@
 								{
 									"key": "dataFinal",
 									"value": "10/02/2025"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resumo de Transacoes por Tipo e Categoria e Periodo de um Usuario",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/transacoes/resumir_por_tipo_categorias_periodo/7?dataInicial=01/01/2025&dataFinal=31/01/2025",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"transacoes",
+								"resumir_por_tipo_categorias_periodo",
+								"7"
+							],
+							"query": [
+								{
+									"key": "dataInicial",
+									"value": "01/01/2025"
+								},
+								{
+									"key": "dataFinal",
+									"value": "31/01/2025"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resumo de Transacoes por Tipo e Metodo e Periodo de um Usuario",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/transacoes/resumir_por_tipo_metodos_periodo/4?dataInicial=01/02/2025&dataFinal=31/02/2025",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"transacoes",
+								"resumir_por_tipo_metodos_periodo",
+								"4"
+							],
+							"query": [
+								{
+									"key": "dataInicial",
+									"value": "01/02/2025"
+								},
+								{
+									"key": "dataFinal",
+									"value": "31/02/2025"
 								}
 							]
 						}

@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 
-public record TransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO(
+public record TransacaoDadosComSaldoDeUsuarioPorPeriodoDTO(
         String dataInicial,
         String dataFinal,
         BigDecimal saldoAnterior,

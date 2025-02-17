@@ -1,6 +1,7 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.controller;
 
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.*;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.resumo.ResumoTransacaoDeUsuarioPorPeriodoDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.service.TransacaoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +41,8 @@ public class TransacaoController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/listarcomsaldoporperiodo/{usuarioId}")
-    public ResponseEntity<TransacaoDadosAposConsultaComSaldoDeUsuarioPorPeriodoDTO> listarTransacoesComSaldoDeUsuarioPorPeriodo(
+    @GetMapping("/listar_com_saldo_por_periodo/{usuarioId}")
+    public ResponseEntity<TransacaoDadosComSaldoDeUsuarioPorPeriodoDTO> listarTransacoesComSaldoDeUsuarioPorPeriodo(
             @RequestParam(required = false) String dataInicial,
             @RequestParam(required = false) String dataFinal,
             @RequestParam(defaultValue = "0") int page,
@@ -57,5 +58,23 @@ public class TransacaoController {
     public ResponseEntity atualizarTransacao(@RequestBody @Valid TransacaoAtualizacaoDTO dto){
         var transacao = service.atualizarTransacao(dto);
         return ResponseEntity.ok(new TransacaoDadosAposCadastroOuAtualizacaoDTO(transacao));
+    }
+
+    @GetMapping("/resumir_por_tipo_categorias_periodo/{usuarioId}")
+    public ResponseEntity<ResumoTransacaoDeUsuarioPorPeriodoDTO> ResumoDeUsuarioPorPeriodoETipoECategoria(
+            @RequestParam(required = false) String dataInicial,
+            @RequestParam(required = false) String dataFinal,
+            @PathVariable Long usuarioId){
+        var resposta = service.ResumoDeUsuarioPorPeriodoETipoECategoria(usuarioId, dataInicial, dataFinal);
+        return ResponseEntity.ok(resposta);
+    }
+
+    @GetMapping("/resumir_por_tipo_metodos_periodo/{usuarioId}")
+    public ResponseEntity<ResumoTransacaoDeUsuarioPorPeriodoDTO> ResumoDeUsuarioPorPeriodoETipoEMetodo(
+            @RequestParam(required = false) String dataInicial,
+            @RequestParam(required = false) String dataFinal,
+            @PathVariable Long usuarioId){
+        var resposta = service.ResumoDeUsuarioPorPeriodoETipoEMetodo(usuarioId, dataInicial, dataFinal);
+        return ResponseEntity.ok(resposta);
     }
 }
