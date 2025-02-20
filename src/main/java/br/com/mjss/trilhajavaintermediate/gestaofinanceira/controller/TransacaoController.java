@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
@@ -76,5 +77,12 @@ public class TransacaoController {
             @PathVariable Long usuarioId){
         var resposta = service.ResumoDeUsuarioPorPeriodoETipoEMetodo(usuarioId, dataInicial, dataFinal);
         return ResponseEntity.ok(resposta);
+    }
+
+    @PostMapping("/cadastrar_transacoes_por_planilha/{usuarioId}")
+    @Transactional
+    public void cadastrarTransacaoDePlanilhaExcel(@RequestParam("arquivo") MultipartFile arquivo,
+                                                  @PathVariable Long usuarioId) {
+        service.cadastrarTransacaoDePlanilhaExcel(arquivo,usuarioId);
     }
 }

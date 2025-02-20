@@ -14,12 +14,24 @@ import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.usuario.Usuario
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.TransacaoComSaldoViewRepository;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.TransacaoRepository;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.repository.UsuarioRepository;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.utils.ResultadoDuploCategoriaEMensagem;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.utils.ResultadoDuploMetodoEMensagem;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.utils.ResultadoDuploTipoTransacaoEMensagem;
 import jakarta.persistence.EntityNotFoundException;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.apache.poi.ss.usermodel.*;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -98,6 +110,214 @@ public class TransacaoService {
 
         var usuario = usuarioRepository.getReferenceById(usuarioId);
         return retornaResumoTransacaoDeUsuarioPorPeriodoDTOComTipoEMetodo(dataInicial, dataFinal, usuario);
+    }
+
+    public void cadastrarTransacaoDePlanilhaExcel(MultipartFile file, Long usuarioId) {
+        // Criar um formatador de data
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+        validaSeUsuarioExiste(usuarioId);
+        var usuario = usuarioRepository.getReferenceById(usuarioId);
+        List<Transacao> listaTransacoes = new ArrayList<>();
+        List<String> listaMotivos = new ArrayList<>();
+
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowIterator = sheet.iterator();
+            rowIterator.next(); // pular cabeçalho
+
+            while (rowIterator.hasNext()) {
+                String mensagemMotivo = "";
+                Row row = rowIterator.next();
+
+                // Verificar se a linha está vazia
+                if (isRowEmpty(row)) {
+                    break; // Para o loop se a linha estiver vazia
+                }
+
+                // Obtém a data da célula (considerando que a data está na primeira coluna)
+                Date dataCellValue = row.getCell(0).getDateCellValue();
+
+                // Converter a data para o formato desejado
+                String dataFormatada = dateFormat.format(dataCellValue);
+
+                var dataHoraTransacao = converteParaLocalDateTime(dataFormatada, false);
+
+                var  tipoTransacaoPlanilha = row.getCell(4).getStringCellValue();
+                var  tipoTransacao = retornaTipoTransacaoEMensagem(tipoTransacaoPlanilha, mensagemMotivo).getTipoTransacao();
+                mensagemMotivo = retornaTipoTransacaoEMensagem(tipoTransacaoPlanilha,mensagemMotivo).getMensagemMotivo();
+
+                var categoriaPlanilha = row.getCell(1).getStringCellValue();
+                var categoria = retornaCategoriaEMensagem(categoriaPlanilha, mensagemMotivo).getCategoria();
+                mensagemMotivo = retornaCategoriaEMensagem(categoriaPlanilha, mensagemMotivo).getMensagemMotivo();
+
+                var descricao = row.getCell(2).getStringCellValue();
+                var valor = new BigDecimal(row.getCell(3).getNumericCellValue());
+
+                var metodoPlanilha = row.getCell(5).getStringCellValue();
+                var metodo = retornaMetodoEMensagem(metodoPlanilha, mensagemMotivo).getMetodo();
+                mensagemMotivo = retornaMetodoEMensagem(metodoPlanilha, mensagemMotivo).getMensagemMotivo();
+
+                var idusuario = usuarioId;
+
+                var dto = new TransacaoCadastroDTO(dataHoraTransacao, tipoTransacao, categoria, descricao, valor,
+                        metodo, idusuario);
+
+                var transacao = new Transacao(usuario, dto);
+                if (mensagemMotivo.equals("")){
+                    row.getCell(6).setCellValue("SIM");
+//                    Cell cell = row.createCell(6);
+//                    cell.setCellValue("SIM");
+                    listaTransacoes.add(transacao);
+                } else{
+                    row.getCell(6).setCellValue("NÃO");
+                    row.getCell(7).setCellValue(mensagemMotivo);
+                    listaMotivos.add(mensagemMotivo);
+                }
+
+            }
+            for (Transacao t: listaTransacoes){
+                System.out.println(t);
+            }
+
+            for (String s: listaMotivos){
+                System.out.println(s);
+            }
+
+            var caminho = file.getOriginalFilename();
+            // Salvar as alterações de volta no arquivo
+            try (FileOutputStream fileOut = new FileOutputStream("arquivos/" + file.getOriginalFilename())) {
+                workbook.write(fileOut);
+            }
+
+//            repository.saveAll(listaTransacoes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalArgumentException e){
+            throw new ValidacaoNegocioException(e.getMessage());
+        }
+    }
+
+    private ResultadoDuploTipoTransacaoEMensagem retornaTipoTransacaoEMensagem(String valor, String mensagemMotivo) {
+        var resultadoTipo = validaEnumTipoTransacao(valor);
+        TipoTransacao tipoTransacao = null;
+        if (resultadoTipo == null){
+            tipoTransacao = TipoTransacao.valueOf(valor);
+        } else {
+            if (!mensagemMotivo.equals("")){
+                mensagemMotivo += "\n";
+            }
+            mensagemMotivo += "[TIPO]: " + resultadoTipo;
+        }
+
+        return new ResultadoDuploTipoTransacaoEMensagem(tipoTransacao, mensagemMotivo);
+    }
+
+    private ResultadoDuploCategoriaEMensagem retornaCategoriaEMensagem(String valor, String mensagemMotivo) {
+        var resultaCategoria = validaEnumCategoria(valor);
+        Categoria categoria = null;
+        if (resultaCategoria == null){
+            categoria = Categoria.valueOf(valor);
+        } else {
+            if (!mensagemMotivo.equals("")){
+                mensagemMotivo += "\n";
+            }
+            mensagemMotivo += "[CATEGORIA]: " + resultaCategoria;
+        }
+
+        return new ResultadoDuploCategoriaEMensagem(categoria, mensagemMotivo);
+    }
+
+    private ResultadoDuploMetodoEMensagem retornaMetodoEMensagem(String valor, String mensagemMotivo) {
+        var resultaMetodo = validaEnumMetodo(valor);
+        Metodo metodo = null;
+        if (resultaMetodo == null){
+            metodo = Metodo.valueOf(valor);
+        } else {
+            if (!mensagemMotivo.equals("")){
+                mensagemMotivo += "\n";
+            }
+            mensagemMotivo += "[MÉTODO]: " + resultaMetodo;
+        }
+
+        return new ResultadoDuploMetodoEMensagem(metodo, mensagemMotivo);
+    }
+
+    private String validaEnumTipoTransacao(String tipoStr) {
+        String mensagem = null;
+        if(tipoStr.isBlank()) {
+            mensagem = "O 'tipo' não pode ser 'null' ou 'vazio'";
+        } else if (!isValidEnumTipoTransacao(tipoStr)){
+            var listaValoresEsperados =  Arrays.stream(TipoTransacao.values()).toList();
+            mensagem = "O 'tipo' passado '%s' não é valido, é esperado '%s'.".formatted(tipoStr, listaValoresEsperados);
+        }
+        return mensagem;
+    }
+
+    private String validaEnumCategoria(String tipoStr) {
+        String mensagem = null;
+        if(tipoStr.isBlank()) {
+            mensagem = "A 'categoria' não pode ser 'null' ou 'vazio'";
+        } else if (!isValidEnumCategoria(tipoStr)){
+            var listaValoresEsperados =  Arrays.stream(Categoria.values()).toList();
+            mensagem = "A 'categoria' passada '%s' não é valida, é esperado '%s'.".formatted(tipoStr, listaValoresEsperados);
+        }
+        return mensagem;
+    }
+
+    private String validaEnumMetodo(String tipoStr) {
+        String mensagem = null;
+        if(tipoStr.isBlank()) {
+            mensagem = "O 'método' não pode ser 'null' ou 'vazio'";
+        } else if (!isValidEnumMetodo(tipoStr)){
+            var listaValoresEsperados =  Arrays.stream(Metodo.values()).toList();
+            mensagem = "O 'método' passado '%s' não é valido, é esperado '%s'.".formatted(tipoStr, listaValoresEsperados);
+        }
+        return mensagem;
+    }
+
+    private static boolean isValidEnumTipoTransacao(String value) {
+        for (TipoTransacao tipo : TipoTransacao.values()) {
+            if (tipo.name().equals(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isValidEnumCategoria(String value) {
+        for (Categoria categoria : Categoria.values()) {
+            if (categoria.name().equals(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isValidEnumMetodo(String value) {
+        for (Metodo metodo : Metodo.values()) {
+            if (metodo.name().equals(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Método para verificar se uma linha está vazia
+    private boolean isRowEmpty(Row row) {
+        if (row.getPhysicalNumberOfCells() == 0) {
+            return true; // Linha sem células
+        }
+
+        // Percorre as células na linha para verificar se todas estão vazias
+        for (int i = 0; i < row.getPhysicalNumberOfCells(); i++) {
+            Cell cell = row.getCell(i);
+            if (cell != null && cell.getCellType() != CellType.BLANK) {
+                return false; // Se encontrar uma célula não vazia
+            }
+        }
+
+        return true; // Se todas as células estão vazias
     }
 
     private void validaSeValorAdequadaComTipoParaAtualizacao(TipoTransacao tipo, BigDecimal valor) {
