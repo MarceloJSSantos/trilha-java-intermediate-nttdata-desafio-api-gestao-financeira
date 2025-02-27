@@ -156,14 +156,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/transacoes/390",
+							"raw": "localhost:8080/transacoes/39",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
 								"transacoes",
-								"390"
+								"39"
 							]
 						}
 					},
@@ -187,7 +187,7 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8080/transacoes/listar_com_saldo_por_periodo/7?dataInicial=01/02/2025&dataFinal=10/02/2025",
+							"raw": "localhost:8080/transacoes/listar_com_saldo_por_periodo/44?dataInicial=01/02/2025&dataFinal=26/02/2025",
 							"host": [
 								"localhost"
 							],
@@ -195,7 +195,7 @@
 							"path": [
 								"transacoes",
 								"listar_com_saldo_por_periodo",
-								"7"
+								"44"
 							],
 							"query": [
 								{
@@ -204,7 +204,7 @@
 								},
 								{
 									"key": "dataFinal",
-									"value": "10/02/2025"
+									"value": "26/02/2025"
 								}
 							]
 						}
@@ -321,7 +321,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"dataHoraTransacao\": \"10/02/2025 16:17:12\",\r\n    \"tipo\": \"RECEITA\",\r\n    \"categoria\": \"SALARIO\",\r\n    \"descricao\": \"\",\r\n    \"valor\": 10584.56,\r\n    \"metodo\": \"TRANSFERENCIA\",\r\n    \"idUsuario\": 7\r\n}",
+							"raw": "{\r\n    \"dataHoraTransacao\": \"10/02/2025 16:17:12\",\r\n    \"tipo\": \"PAGAMENTO\",\r\n    \"categoria\": \"SALARIO\",\r\n    \"descricao\": \"\",\r\n    \"valor\": 10584.56,\r\n    \"metodo\": \"TRANSFERENCIA\",\r\n    \"idUsuario\": 7\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -342,13 +342,43 @@
 					"response": []
 				},
 				{
+					"name": "Cadastrar Transação por Planilha",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "arquivo",
+									"type": "file",
+									"src": "/C:/projetos_java/gestaofinanceira/arquivos/transacoes-importacao-2025-02-teste-xxx.xlsx"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8080/transacoes/cadastrar_transacoes_por_planilha/44",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"transacoes",
+								"cadastrar_transacoes_por_planilha",
+								"44"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Atualizar Transação",
 					"request": {
 						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"id\": 40,\r\n    \"tipo\": \"RECEITA\",\r\n    \"categoria\": \"TRANSPORTE\",\r\n    \"metodo\": \"TRANSFERENCIA\",\r\n    \"valor\": -10600,\r\n    \"descricao\": \"atualização de tipo/categoria/metodo/valor\"\r\n}",
+							"raw": "{\r\n    \"id\": 40,\r\n    \"tipo\": \"PAGAMENTO\",\r\n    \"categoria\": \"TRANSPORTE\",\r\n    \"metodo\": \"TRANSFERENCIA\",\r\n    \"valor\": -10600,\r\n    \"descricao\": \"atualização de tipo/categoria/metodo/valor\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"

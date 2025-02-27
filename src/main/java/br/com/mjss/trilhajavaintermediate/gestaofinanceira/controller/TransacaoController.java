@@ -1,6 +1,7 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.controller;
 
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.*;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.importacaoPlanilha.TransacaoAposCadastroPlanilhaPrincipalDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.resumo.ResumoTransacaoDeUsuarioPorPeriodoDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.service.TransacaoService;
 import jakarta.validation.Valid;
@@ -81,8 +82,9 @@ public class TransacaoController {
 
     @PostMapping("/cadastrar_transacoes_por_planilha/{usuarioId}")
     @Transactional
-    public void cadastrarTransacaoDePlanilhaExcel(@RequestParam("arquivo") MultipartFile arquivo,
-                                                  @PathVariable Long usuarioId) {
-        service.cadastrarTransacaoDePlanilhaExcel(arquivo,usuarioId);
+    public ResponseEntity<TransacaoAposCadastroPlanilhaPrincipalDTO> cadastrarTransacaoDePlanilhaExcel(@RequestParam("arquivo") MultipartFile arquivo,
+                                                                                                       @PathVariable Long usuarioId) {
+        var resposta = service.cadastrarTransacaoDePlanilhaExcel(arquivo,usuarioId);
+        return ResponseEntity.ok(resposta);
     }
 }

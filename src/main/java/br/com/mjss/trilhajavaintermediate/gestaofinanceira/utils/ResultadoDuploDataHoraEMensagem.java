@@ -1,14 +1,14 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.utils;
 
-import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.Metodo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @AllArgsConstructor
 @Getter
-public class ResultadoDuploMetodoEMensagem {
-    private Metodo metodo;
+public class ResultadoDuploDataHoraEMensagem {
+    private LocalDateTime dataHora;
     private List<String> motivos;
 }

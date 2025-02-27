@@ -4,9 +4,11 @@ import br.com.mjss.trilhajavaintermediate.gestaofinanceira.model.transacao.TipoT
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.List;
+
 @AllArgsConstructor
 @Getter
 public class ResultadoDuploTipoTransacaoEMensagem {
     private TipoTransacao tipoTransacao;
-    private String mensagemMotivo;
+    private List<String> motivos;
 }

@@ -59,18 +59,4 @@ public class Transacao {
         if (dto.valor() != null) this.valor = dto.valor();
         if (dto.metodo() != null) this.metodo = dto.metodo();
     }
-
-    @Override
-    public String toString() {
-        return "Transacao{" +
-                "id=" + id +
-                ", dataHoraTransacao=" + dataHoraTransacao +
-                ", tipo=" + tipo +
-                ", categoria=" + categoria +
-                ", descricao='" + descricao + '\'' +
-                ", valor=" + valor +
-                ", metodo=" + metodo +
-                ", usuario=" + usuario +
-                '}';
-    }
 }

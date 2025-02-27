@@ -46,9 +46,14 @@ API de gestão financeira para clientes bancários que permite aos usuários o g
   - [x] Models
   - [x] Repositories (tabela e view com saldo)
   - [x] Scripts BD
-- [x] Criação as requisições 'Resumo de Transações'
+- [x] Criação da requisição 'Resumo de Transações'
   * Resume as transações por Período, Tipo e Categoria de um usuário
   * Resume as transações por Período, Tipo e Método de um usuário
+  - [x] Atualização Controller
+  - [x] Criação de DTOs necessários
+  - [x] Atualização Service
+- [x] Criação da requisição 'Importação de transações por planilha'
+  * Implemnta o cadastro de transações por importação de planilha
   - [x] Atualização Controller
   - [x] Criação de DTOs necessários
   - [x] Atualização Service

@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MultipartException;
 
 @RestControllerAdvice
 public class TratadorErros {
@@ -56,6 +57,25 @@ public class TratadorErros {
         ObjectNode errorJson = objectMapper.createObjectNode();
         errorJson.put("erro", e.getClass().getSimpleName());
         errorJson.put("mensagem", e.getMessage());
+
+        return ResponseEntity.internalServerError().body(errorJson);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity trataErro500(IllegalStateException e){
+        ObjectNode errorJson = objectMapper.createObjectNode();
+        errorJson.put("erro", e.getClass().getSimpleName());
+        errorJson.put("mensagem","Não é possível obter um valor adequado de uma das células.");
+
+        return ResponseEntity.internalServerError().body(errorJson);
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity trataErro500(MultipartException e){
+        ObjectNode errorJson = objectMapper.createObjectNode();
+        errorJson.put("erro", e.getClass().getSimpleName());
+        errorJson.put("mensagem", "A solicitação atual não é uma solicitação 'multipart'." +
+                " Verifique se o arquivo a ser importado está presente.");
 
         return ResponseEntity.internalServerError().body(errorJson);
     }
