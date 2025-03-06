@@ -1,5 +1,7 @@
 package br.com.mjss.trilhajavaintermediate.gestaofinanceira.service;
 
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.businessValidation.transacao.atualizacao.ValidacaoAtualizacaoTransacao;
+import br.com.mjss.trilhajavaintermediate.gestaofinanceira.businessValidation.transacao.cadastro.ValidacaoCadastroTransacao;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.*;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.importacaoPlanilha.TransacaoAposCadastroPlanilhaPrincipalDTO;
 import br.com.mjss.trilhajavaintermediate.gestaofinanceira.dto.transacao.resumo.ResumoTransacaoDeUsuarioPorPeriodoDTO;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class TransacaoService {
@@ -31,6 +34,10 @@ public class TransacaoService {
     private ResumeTransacaoService resumeTransacaoService;
     @Autowired
     private SaldoTransacaoService saldoTransacaoService;
+    @Autowired
+    private List<ValidacaoCadastroTransacao> validacaoCadastroTransacao;
+    @Autowired
+    private List<ValidacaoAtualizacaoTransacao> validacaoAtualizacaoTransacaos;
 
     public Transacao cadastrar(TransacaoCadastroDTO dto) {
         var usuario = usuarioRepository.getReferenceById(dto.idUsuario());
@@ -38,9 +45,11 @@ public class TransacaoService {
 
         validaSeUsuarioExiste(dto.idUsuario());
 
-        validaSeCategoriaAdequadaComTipoParaCadastro(dto.tipo(), dto.categoria());
-        validaSeMetodoAdequadoComTipoParaCadastro(dto.tipo(), dto.metodo());
-        validaSeValorAdequadoComTipoParaCadastro(dto.tipo(), dto.valor());
+        validacaoCadastroTransacao.forEach(v -> v.valida(dto));
+
+//        validaSeCategoriaAdequadaComTipoParaCadastro(dto.tipo(), dto.categoria());
+//        validaSeMetodoAdequadoComTipoParaCadastro(dto.tipo(), dto.metodo());
+//        validaSeValorAdequadoComTipoParaCadastro(dto.tipo(), dto.valor());
 
         return repository.save(transacao);
     }
@@ -71,6 +80,8 @@ public class TransacaoService {
         var transacao = repository.getReferenceById(dto.id());
 
         validaSeTipoCategoriaMetodoValorSaoEnviados(dto);
+
+        validacaoAtualizacaoTransacaos.forEach(v -> v.valida(dto));
 
         validaSeCategoriaAdequadaComTipoParaAtualizacao(dto.tipo(), dto.categoria());
         validaSeMetodoAdequadaComTipoParaAtualizacao(dto.tipo(), dto.metodo());
@@ -110,26 +121,26 @@ public class TransacaoService {
                 quantidadeTransacoesNaoProcessadas, listaTransacoesNaoProcessdas);
     }
 
-    private void validaSeValorAdequadaComTipoParaAtualizacao(TipoTransacao tipo, BigDecimal valor) {
-        var seTipoEValorNaoSaoNull = (tipo != null && valor != null);
-        if (seTipoEValorNaoSaoNull) {
-            validaSeValorAdequadoComTipoParaCadastro(tipo, valor);
-        }
-    }
+//    private void validaSeValorAdequadaComTipoParaAtualizacao(TipoTransacao tipo, BigDecimal valor) {
+//        var seTipoEValorNaoSaoNull = (tipo != null && valor != null);
+//        if (seTipoEValorNaoSaoNull) {
+//            validaSeValorAdequadoComTipoParaCadastro(tipo, valor);
+//        }
+//    }
 
-    private void validaSeMetodoAdequadaComTipoParaAtualizacao(TipoTransacao tipo, Metodo metodo) {
-        var seTipoEMetodoNaoSaoNull = (tipo != null && metodo != null);
-        if (seTipoEMetodoNaoSaoNull) {
-            validaSeMetodoAdequadoComTipoParaCadastro(tipo, metodo);
-        }
-    }
+//    private void validaSeMetodoAdequadaComTipoParaAtualizacao(TipoTransacao tipo, Metodo metodo) {
+//        var seTipoEMetodoNaoSaoNull = (tipo != null && metodo != null);
+//        if (seTipoEMetodoNaoSaoNull) {
+//            validaSeMetodoAdequadoComTipoParaCadastro(tipo, metodo);
+//        }
+//    }
 
-    private void validaSeCategoriaAdequadaComTipoParaAtualizacao(TipoTransacao tipo, Categoria categoria) {
-        var seTipoECategoriaNaoSaoNull = (tipo != null && categoria != null);
-        if (seTipoECategoriaNaoSaoNull) {
-            validaSeCategoriaAdequadaComTipoParaCadastro(tipo, categoria);
-        }
-    }
+//    private void validaSeCategoriaAdequadaComTipoParaAtualizacao(TipoTransacao tipo, Categoria categoria) {
+//        var seTipoECategoriaNaoSaoNull = (tipo != null && categoria != null);
+//        if (seTipoECategoriaNaoSaoNull) {
+//            validaSeCategoriaAdequadaComTipoParaCadastro(tipo, categoria);
+//        }
+//    }
 
     private void validaSeTipoCategoriaMetodoValorSaoEnviados(TransacaoAtualizacaoDTO dto) {
         var seTipoOuCategoriaENull = (dto.tipo() == null || dto.categoria() == null || dto.metodo() == null || dto.valor() == null);
@@ -157,35 +168,35 @@ public class TransacaoService {
         }
     }
 
-    private void validaSeCategoriaAdequadaComTipoParaCadastro(TipoTransacao tipo, Categoria categoria) {
-        var seTipoTransacaoEDespesaEseTipoDaCategoriaNaoEDespesa = (tipo == TipoTransacao.DESPESA && !categoria.getTipo().equals(TipoTransacao.DESPESA));
-        var seTipoTransacaoEReceitaEseTipoDaCategoriaNaoEReceita = (tipo == TipoTransacao.RECEITA && !categoria.getTipo().equals(TipoTransacao.RECEITA));
-        var mensagem = "Categoria %s é inválida para tipo %s.".formatted(categoria, tipo);
+//    private void validaSeCategoriaAdequadaComTipoParaCadastro(TipoTransacao tipo, Categoria categoria) {
+//        var seTipoTransacaoEDespesaEseTipoDaCategoriaNaoEDespesa = (tipo == TipoTransacao.DESPESA && !categoria.getTipo().equals(TipoTransacao.DESPESA));
+//        var seTipoTransacaoEReceitaEseTipoDaCategoriaNaoEReceita = (tipo == TipoTransacao.RECEITA && !categoria.getTipo().equals(TipoTransacao.RECEITA));
+//        var mensagem = "Categoria %s é inválida para tipo %s.".formatted(categoria, tipo);
+//
+//        if (seTipoTransacaoEDespesaEseTipoDaCategoriaNaoEDespesa || seTipoTransacaoEReceitaEseTipoDaCategoriaNaoEReceita) {
+//            throw new ValidacaoNegocioException(mensagem);
+//        }
+//    }
 
-        if (seTipoTransacaoEDespesaEseTipoDaCategoriaNaoEDespesa || seTipoTransacaoEReceitaEseTipoDaCategoriaNaoEReceita) {
-            throw new ValidacaoNegocioException(mensagem);
-        }
-    }
+//    private void validaSeMetodoAdequadoComTipoParaCadastro(TipoTransacao tipo, Metodo metodo) {
+//        var seTipoTransacaoEDespesaEseTipoDoMetodoNaoEDespesa = (tipo == TipoTransacao.DESPESA && !metodo.getTipo().equals(TipoTransacao.DESPESA));
+//        var seTipoTransacaoEReceitaEseTipoDoMetodoNaoEReceita = (tipo == TipoTransacao.RECEITA && !metodo.getTipo().equals(TipoTransacao.RECEITA));
+//        var mensagem = "Metodo %s é inválido para tipo %s.".formatted(metodo, tipo);
+//
+//        if (seTipoTransacaoEDespesaEseTipoDoMetodoNaoEDespesa || seTipoTransacaoEReceitaEseTipoDoMetodoNaoEReceita) {
+//            throw new ValidacaoNegocioException(mensagem);
+//        }
+//    }
 
-    private void validaSeMetodoAdequadoComTipoParaCadastro(TipoTransacao tipo, Metodo metodo) {
-        var seTipoTransacaoEDespesaEseTipoDoMetodoNaoEDespesa = (tipo == TipoTransacao.DESPESA && !metodo.getTipo().equals(TipoTransacao.DESPESA));
-        var seTipoTransacaoEReceitaEseTipoDoMetodoNaoEReceita = (tipo == TipoTransacao.RECEITA && !metodo.getTipo().equals(TipoTransacao.RECEITA));
-        var mensagem = "Metodo %s é inválido para tipo %s.".formatted(metodo, tipo);
-
-        if (seTipoTransacaoEDespesaEseTipoDoMetodoNaoEDespesa || seTipoTransacaoEReceitaEseTipoDoMetodoNaoEReceita) {
-            throw new ValidacaoNegocioException(mensagem);
-        }
-    }
-
-    private void validaSeValorAdequadoComTipoParaCadastro(TipoTransacao tipo, BigDecimal valorAtual) {
-        var seTipoTransacaoReceita = tipo.equals(TipoTransacao.RECEITA);
-        var seValorAtualPositivo = valorAtual.signum() == 1;
-        var seValorAtualZero = valorAtual.signum() == 0;
-        var seTipoTransacaoReceitaEValorAtualPositivo = (seTipoTransacaoReceita == seValorAtualPositivo);
-        var mensagem = "O 'valor' %.2f não é apropriado para o 'tipo' %s.".formatted(valorAtual, tipo);
-
-        if (!seTipoTransacaoReceitaEValorAtualPositivo || seValorAtualZero) {
-            throw new ValidacaoNegocioException(mensagem);
-        }
-    }
+//    private void validaSeValorAdequadoComTipoParaCadastro(TipoTransacao tipo, BigDecimal valorAtual) {
+//        var seTipoTransacaoReceita = tipo.equals(TipoTransacao.RECEITA);
+//        var seValorAtualPositivo = valorAtual.signum() == 1;
+//        var seValorAtualZero = valorAtual.signum() == 0;
+//        var seTipoTransacaoReceitaEValorAtualPositivo = (seTipoTransacaoReceita == seValorAtualPositivo);
+//        var mensagem = "O 'valor' %.2f não é apropriado para o 'tipo' %s.".formatted(valorAtual, tipo);
+//
+//        if (!seTipoTransacaoReceitaEValorAtualPositivo || seValorAtualZero) {
+//            throw new ValidacaoNegocioException(mensagem);
+//        }
+//    }
 }
